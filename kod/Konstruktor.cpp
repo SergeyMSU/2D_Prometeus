@@ -204,6 +204,36 @@ void Konstruktor::print_point(void)
 	fout.close();
 }
 
+void Konstruktor::print_Tecplot(void)
+{
+	double r_o = 1.0;    // Размер расстояния
+	double ro_o = 1.0;   // Размер плотности
+	double p_o = 1.0;   // Размер давления
+	double u_o = 1.0;   // Размер давления
+
+
+	ofstream fout;
+	string name_f = "2D_tecplot.txt";
+	fout.open(name_f);
+	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Y\", \"r\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\", ZONE T = \"HP\"" << endl;
+	for (auto& i : this->all_Kyb)
+	{
+			double Max = 0.0;
+			double QQ = 0.0;
+			if (i->ro > 0.000000000001)
+			{
+				QQ = i->Q / i->ro;
+				Max = sqrt(kvv(i->u, i->v, 0.0) / (ggg * i->p / i->ro));
+			}
+
+			fout << i->x * r_o << " " << i->y * r_o << " " << sqrt(i->x * r_o * i->x * r_o + i->y * r_o * i->y * r_o) << //
+				" " << i->ro * ro_o << " " << i->p * p_o << " " //
+				<< i->u * u_o << " " << i->v * u_o << " " << Max << " "  << QQ << endl;
+		
+	}
+	fout.close();
+}
+
 bool Konstruktor::sosed_or_not(Kyb* A, Kyb* B)
 {
 	if (B->number < 0)
@@ -602,5 +632,32 @@ void Konstruktor::number(void)
 			i->number = n;
 			n++;
 		}
+	}
+}
+
+int Konstruktor::get_size_conektiv(void)
+{
+	int ll = 0;
+	for (auto& i : this->all_Kyb)
+	{
+		ll = ll + i->sosed.size();
+	}
+	return ll;
+}
+
+void Konstruktor::initial_condition()
+{
+
+}
+
+void Konstruktor::read_Cuda_massiv(double* ro, double* p, double* u, double* v, double* QQ)
+{
+	for (int i = 0; i < this->all_Kyb.size(); i++)
+	{
+		this->all_Kyb[i]->ro = ro[i];
+		this->all_Kyb[i]->p = p[i];
+		this->all_Kyb[i]->u = u[i];
+		this->all_Kyb[i]->v = v[i];
+		this->all_Kyb[i]->Q = QQ[i];
 	}
 }
