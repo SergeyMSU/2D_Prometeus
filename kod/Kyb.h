@@ -6,34 +6,26 @@ class Kyb;
 class Kyb
 {
 public:
-	double dx;               // Половина ширины ячейки
-	double dy;               // Половина глубины ячейки
-	double dz;               // Половина высоты ячейки
+	double dx;               // Ширина ячейки
+	double dy;               // Высота ячейки
 	double x;                // Координата центра ячейки
 	double y;                // Координата центра ячейки
-	double z;                // Координата центра ячейки
 	double ro;
 	double p;
 	double u;
 	double v;
-	double w;
-	double Bx;
-	double By;
-	double Bz;
 	double Q;
-	double jx;
-	double jy;
-	double jz;
-	bool j_;
 	vector <Kyb*> sosed;
 	int number;
+	int size;                // Показывает на каком этапе мельчения находится эта ячейка, это позволит определить точно её размер (без потери точности)
+
 	static int move_number;
 	bool drob;               // Удобная булевская переменная для использования в разных функциях 
 
 
-	Kyb(double x, double y, double z);      /// Конструктор класса
+	Kyb(double x, double y);      /// Конструктор класса
 
 private:
-	void initialization(double, double, double, int);
+	void initialization(double, double, int);
 };
 
