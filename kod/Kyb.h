@@ -6,8 +6,6 @@ class Kyb;
 class Kyb
 {
 public:
-	double dx;               // Ширина ячейки
-	double dy;               // Высота ячейки
 	double x;                // Координата центра ячейки
 	double y;                // Координата центра ячейки
 	double ro;

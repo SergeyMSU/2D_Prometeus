@@ -46,6 +46,7 @@
 #define gm ((g1/ga)/2.0)
 #define gga ga
 #define Omega 0.0
+#define geo 0.00001
 
 
 #define eps 10e-10

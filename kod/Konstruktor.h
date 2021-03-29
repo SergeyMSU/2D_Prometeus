@@ -15,7 +15,6 @@ public:
 	double DY; 
 	double x_min;
 	double x_max;
-	double y_min;
 	double y_max;
 	Kyb* G1;
 	Kyb* G2;
@@ -25,24 +24,31 @@ public:
 	vector <Kyb*> Sosed_2;
 	vector <Kyb*> Sosed_3;
 	vector <Kyb*> Sosed_4;
-	vector <Kyb*> Sosed_5;
-	vector <Kyb*> Sosed_6;
 
 
-	Konstruktor(int, int, double, double, double);      /// Конструктор класса
+	Konstruktor(int a, int b, double xmin, double xmax, double ymax);      /// Конструктор класса
 
 	virtual ~Konstruktor();
+
+	bool sosed_or_not(Kyb* A, Kyb* B);
 
 
 	void print_konectiviti_short(void);
 	/// Показывает между какими ячейками есть связи (для ТекПлота)
 	/// не включает в себя граничные ячейки G1 - G4
+	void print_point(void);
+	void print_cell(void);
+
+
+	void droblenie2_hand(Kyb* A);
+	void Drobim(double x0, double y0, double r1, double r2);
 
 
 
 private:
-	void initialization(int a, int b, double x1, double x2, double y2);
+	void initialization(int a, int b, double xmin, double xmax, double ymax);
 	void New_design(void);
 	void konectiviti(void);
+	void number(void);
 };
 

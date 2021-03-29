@@ -49,13 +49,14 @@ int main()
 
 cudaError_t addWithCuda()
 {
-    cudaError_t cudaStatus;
+    cudaError_t cudaStatus = cudaSuccess;
 
-
-    Konstruktor K(20, 20, 100, -100, 100);
+    Konstruktor K(30, 30, -100, 100, 100);
+    K.Drobim(0, 0, 0, 50);
+    K.Drobim(0, 0, 30, 80);
     K.print_konectiviti_short();
-
-
+    K.print_point();
+    K.print_cell();
 
 
     return cudaStatus;
