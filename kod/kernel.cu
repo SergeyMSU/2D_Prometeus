@@ -63,19 +63,29 @@ cudaError_t addWithCuda()
 {
     cudaError_t cudaStatus = cudaSuccess;
 
-    Konstruktor K(330, 300, x_min_, x_max_, y_max_);
-    K.Drobim(-500, 400, 400);
-    K.Drobim(-480, 300, 300);
-    K.Drobim(0, 0, 105, 180);
+    Konstruktor K(66, 56, x_min_, x_max_, y_max_);
+    
+
+    K.Drobim(-1500, 600, 1200);
+    K.Drobim(-1000, 500, 700);
+    K.Drobim(-400, 380, 350);
+    K.Drobim(0, 0, 0, 300);
+    K.Drobim(0, 0, 0, 160);
+    K.Drobim(0, 0, 0, 80);
+    K.Drobim(0, 0, 0, 40);
+    
+
+    K.print_cell();
 
     int N = K.all_Kyb.size();          // Число ячеек
     cout << "All size = " << N << endl;
     int nn = K.get_size_conektiv();    // Число связей (размер массива связей)
     cout << "Connect = " << nn << endl;
+    //exit(-1);
 
 
     K.initial_condition();   // Заполнение начальными условиями
-
+    //K.Download_setka("all_save_1.txt");
 
     int* host_sosed;
     int* dev_sosed;
@@ -396,9 +406,10 @@ cudaError_t addWithCuda()
 
 
     cout << "Start programm" << endl;
-    for (int i = 0; i < 700000; i = i + 2)  // Сколько шагов по времени делаем?
+    met = 0;
+    for (int i = 0; i < 300000; i = i + 2)  // Сколько шагов по времени делаем?
     {
-        if (i > 400000)
+        if (i > 150000)
         {
             met = 1;
         }
@@ -508,7 +519,7 @@ cudaError_t addWithCuda()
 
     K.read_Cuda_massiv(host_ro1, host_p1, host_u1, host_v1,  host_Q1);
     K.print_Tecplot();
-    K.Save_setka("all_seve_1.txt");
+    K.Save_setka("all_save_1.txt");
 
 
 

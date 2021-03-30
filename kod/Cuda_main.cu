@@ -166,8 +166,16 @@ __device__ double HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, co
     double ptz = (ptzR + ptzL) / 2.0;
 
 
-    vRR = UZ2 / UZ0;
-    vLL = vRR;
+    if (fabs(v1 - v2) > 0.05 * (fabs(v1) + fabs(v2)) )
+    {
+        vRR = v2;
+        vLL = v1;
+    }
+    else
+    {
+        vRR = UZ2 / UZ0;
+        vLL = vRR;
+    }
 
 
     ee2 = e2 * suRm + (ptz * SM - p_R * u2) / (SR - SM);
@@ -312,7 +320,7 @@ __global__ void Cuda_main_HLLDQ(int* NN, double* X, double* Y, int* Size,//
                 dist = dx;
 
                 double uu = u;
-                if (uu > Velosity_inf && step_ < 300000)
+                if (uu > Velosity_inf && y < 300)
                 {
                     uu = Velosity_inf;
                 }

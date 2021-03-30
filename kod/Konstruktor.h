@@ -47,6 +47,7 @@ public:
 	int get_size_conektiv(void);
 
 	void Save_setka(string name);
+	void Download_setka(string name);
 
 
 	// Механика

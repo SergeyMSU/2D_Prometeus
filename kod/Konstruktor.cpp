@@ -170,24 +170,21 @@ void Konstruktor::print_cell(void)
 	ofstream fout;
 	fout.open("Setka_all_cell.txt");
 	fout << "TITLE = \"HP\" ";
-	fout << " VARIABLES = \"X\", \"Y\"  ZONE T= \"HP\", N=  " << 4 * ll;
-	fout << " , E= " << 4 * ll;
+	fout << " VARIABLES = \"X\", \"Y\"  ZONE T= \"HP\", N=  " << 3 * ll;
+	fout << " , E= " << 2 * ll;
 	fout << " , F=FEPOINT, ET=LINESEG  " << endl;
 	for (auto& i : this->all_Kyb)
 	{
 		double dx_1 = (this->DX / pow(2, i->size - 1)) / 2.0;   // Половина длины ячейки
 		double dy_1 = (this->DY / pow(2, i->size - 1)) / 2.0;   // Половина ширины ячейки
+		fout << i->x + dx_1 << " " << i->y - dy_1 << endl;
 		fout << i->x - dx_1 << " " << i->y - dy_1 << endl;
 		fout << i->x - dx_1 << " " << i->y + dy_1 << endl;
-		fout << i->x + dx_1 << " " << i->y + dy_1 << endl;
-		fout << i->x + dx_1 << " " << i->y - dy_1 << endl;
 	}
 	for (int i = 0; i < ll; i++)
 	{
-		fout << 4 * i + 1 << " " << 4 * i + 2 << endl;
-		fout << 4 * i + 2 << " " << 4 * i + 3 << endl;
-		fout << 4 * i + 3 << " " << 4 * i + 4 << endl;
-		fout << 4 * i + 1 << " " << 4 * i + 4 << endl;
+		fout << 3 * i + 1 << " " << 3 * i + 2 << endl;
+		fout << 3 * i + 2 << " " << 3 * i + 3 << endl;
 	}
 
 	fout.close();
@@ -635,7 +632,7 @@ void Konstruktor::Drobim(double x1, double x2, double r1)
 	for (auto& i : this->all_Kyb)
 	{
 		r = sqrt(kv(i->x) + kv(i->y));
-		if ((i->x > x1) && (i->x < x2) && (i->y < r1) && (r > 0.95 * Distant))
+		if ((i->x > x1) && (i->x < x2) && (i->y < r1) && (r > 0.8 * Distant))
 		{
 			ll++;
 			i->drob = true;
@@ -730,6 +727,20 @@ void Konstruktor::Save_setka(string name)
 	for (auto& i : this->all_Kyb)
 	{
 		fout << i->ro << " " << i->p << " " << i->u << " " << i->v << " " << i->Q << endl;
+	}
+
+	fout.close();
+}
+
+void Konstruktor::Download_setka(string name)
+{
+	int ll = this->all_Kyb.size();
+	ifstream fout;
+	fout.open(name);
+
+	for (auto& i : this->all_Kyb)
+	{
+		fout >> i->ro >> i->p >>  i->u >>  i->v >> i->Q;
 	}
 
 	fout.close();
