@@ -6,29 +6,21 @@
 #include <fstream>
 #include <math.h>
 
-#define M_inf  2.2 // 0.7 // 0.4 // 0.8
-#define M_infty  M_inf
-#define phi_0  1.627 // 17.0 // 4.878 //1.627
-#define alpha  45.0
-#define M_alf  12.927 // 12.0
-#define epsilon_ (1.0/M_alf)
-#define step  70000
-#define omega 0.0 //6 //1600
-#define M_0  1.1
+// Параметры под задачу. Только их можно менять
+#define Kn  242.944										// Число Кнудсена
+#define Velosity_inf -2.54186							// Скорость плазмы на бесконечности
+#define a_2 0.102584
+#define sigma(x) (kv(1.0 - a_2 * log(x)))               // Диффернциальное сечение перезарядки
+#define Distant 110										// a.u.
+#define geo 0.00001										// Геометрическая точность
+#define x_min_  -1500.0 // -2500.0 // -1300  //-2000                // -1500.0
+#define x_max_ 650.0 // 450.0
+#define y_max_ 1100.0 // 1600.0 //1840.0
+#define chi_ 36.1059
 
-#define kk_ 196.0
-#define betta 0.0 //4.2426
-#define chi 2.0
-#define rr_0  0.01005127
 
-#define kurant  0.2
+#define kurant  0.5
 
-//#define Max_E  6.0
-//#define M_A  12.87
-//#define M_infty  1.97
-//#define kappa_  5.3743
-//#define rr_0  0.00208527 // 0.00329761
-//#define mu 0.2837
 
 #define ga (5.0/3.0)          // Показатель адиабаты
 #define ggg (5.0/3.0)
@@ -46,7 +38,7 @@
 #define gm ((g1/ga)/2.0)
 #define gga ga
 #define Omega 0.0
-#define geo 0.00001
+
 
 
 #define eps 10e-10

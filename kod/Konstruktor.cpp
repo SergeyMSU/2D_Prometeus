@@ -332,6 +332,7 @@ bool Konstruktor::sosed_or_not(Kyb* A, Kyb* B)
 			}
 		}
 	}
+	return false;
 }
 
 void Konstruktor::droblenie2_hand(Kyb* A)
@@ -622,6 +623,42 @@ void Konstruktor::Drobim(double x0, double y0, double r1, double r2)
 	this->number();
 }
 
+void Konstruktor::Drobim(double x1, double x2, double r1)
+{
+	for (auto& i : this->all_Kyb)
+	{
+		i->drob = false;
+	}
+
+	int ll = 0;
+	double r;
+	for (auto& i : this->all_Kyb)
+	{
+		r = sqrt(kv(i->x) + kv(i->y));
+		if ((i->x > x1) && (i->x < x2) && (i->y < r1) && (r > 0.95 * Distant))
+		{
+			ll++;
+			i->drob = true;
+		}
+	}
+
+	int mm = this->all_Kyb.size();
+
+	for (int i = 0; i < mm; i++)
+	{
+		if (this->all_Kyb[i]->drob == true)
+		{
+			this->droblenie2_hand(this->all_Kyb[i]);
+			ll--;
+			if (ll % 25000 == 0)
+			{
+				cout << ll << endl;
+			}
+		}
+	}
+	this->number();
+}
+
 void Konstruktor::number(void)
 {
 	int n = 0;
@@ -647,7 +684,29 @@ int Konstruktor::get_size_conektiv(void)
 
 void Konstruktor::initial_condition()
 {
-
+	for (auto& i : this->all_Kyb)
+	{
+		double dist = sqrt(i->x * i->x + i->y * i->y);
+		double r_0 = 1.0;
+		double ro = (389.988 * 389.988) / (chi_ * chi_);
+		double P_E = ro * chi_ * chi_ / (ggg * 0.25 * 0.25);
+		if (dist > Distant * 1.5)
+		{
+			i->ro = 1.0;
+			i->p = 1.0;
+			i->u = Velosity_inf;
+			i->v = 0.0;
+			i->Q = 100.0;
+		}
+		else
+		{
+			i->ro = ro / (dist * dist);
+			i->p = P_E * pow(r_0 / dist, 2.0 * ggg);
+			i->u = chi_ * i->x / dist;
+			i->v = chi_ * i->y / dist;
+			i->Q = ro * r_0 * r_0 / (dist * dist);
+		}
+	}
 }
 
 void Konstruktor::read_Cuda_massiv(double* ro, double* p, double* u, double* v, double* QQ)
@@ -660,4 +719,18 @@ void Konstruktor::read_Cuda_massiv(double* ro, double* p, double* u, double* v, 
 		this->all_Kyb[i]->v = v[i];
 		this->all_Kyb[i]->Q = QQ[i];
 	}
+}
+
+void Konstruktor::Save_setka(string name)
+{
+	int ll = this->all_Kyb.size();
+	ofstream fout;
+	fout.open(name);
+
+	for (auto& i : this->all_Kyb)
+	{
+		fout << i->ro << " " << i->p << " " << i->u << " " << i->v << " " << i->Q << endl;
+	}
+
+	fout.close();
 }

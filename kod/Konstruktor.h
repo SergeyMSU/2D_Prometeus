@@ -42,15 +42,17 @@ public:
 
 	void droblenie2_hand(Kyb* A);
 	void Drobim(double x0, double y0, double r1, double r2);
+	void Drobim(double x1, double x2, double r1);
 
 	int get_size_conektiv(void);
 
+	void Save_setka(string name);
 
 
 	// Механика
 	void initial_condition();
-	void Konstruktor::read_Cuda_massiv(double* ro, double* p, double* u, double* v, double* QQ);
-	void Konstruktor::print_Tecplot(void);
+	void read_Cuda_massiv(double* ro, double* p, double* u, double* v, double* QQ);
+	void print_Tecplot(void);
 
 
 
