@@ -7,7 +7,7 @@
 #include <math.h>
 
 // Параметры под задачу. Только их можно менять
-#define Kn  242.944										// Число Кнудсена
+#define Kn_  242.944										// Число Кнудсена
 #define Velosity_inf -2.54186							// Скорость плазмы на бесконечности
 #define a_2 0.102584
 #define sigma(x) (kv(1.0 - a_2 * log(x)))               // Диффернциальное сечение перезарядки
@@ -17,9 +17,10 @@
 #define x_max_ 650.0 // 450.0
 #define y_max_ 1400.0 // 1600.0 //1840.0
 #define chi_ 36.1059
+#define n_p_LISM_ (3.0) 
+#define n_H_LISM_ (1.0)
 
-
-#define kurant  0.5
+#define kurant  0.95
 
 
 #define ga (5.0/3.0)          // Показатель адиабаты
