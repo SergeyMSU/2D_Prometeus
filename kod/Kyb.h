@@ -39,6 +39,9 @@ public:
 
 	Kyb(double x, double y);      /// Конструктор класса
 
+	/// Копирует значения переменных из B в A
+	friend void Copy(Kyb* A, Kyb* B);
+
 private:
 	void initialization(double, double, int);
 };

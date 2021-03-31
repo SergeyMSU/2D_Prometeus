@@ -33,6 +33,8 @@ public:
 	bool sosed_or_not(Kyb* A, Kyb* B);
 
 
+	// Ѕлок вывода геометрической информации по сетки
+
 	void print_konectiviti_short(void);
 	/// ѕоказывает между какими €чейками есть св€зи (дл€ “екѕлота)
 	/// не включает в себ€ граничные €чейки G1 - G4
@@ -40,11 +42,15 @@ public:
 	void print_cell(void);
 
 
+
 	void droblenie2_hand(Kyb* A);
 	void Drobim(double x0, double y0, double r1, double r2);
 	void Drobim(double x1, double x2, double r1);
-
 	int get_size_conektiv(void);
+
+
+
+	// Ѕлок сохранени€ и загрузки сетки
 
 	void Save_setka(string name);
 	void Save_setka_multifluid(string name);
@@ -62,6 +68,15 @@ public:
 							double* ro_H4, double* p_H4, double* u_H4, double* v_H4);
 	void print_Tecplot(void);
 	void print_Tecplot_multifluid(void);
+
+
+	// Ѕлок проекции решени€ на ось x
+
+	/// ‘ункци€, проектирующа€ решение на ось x
+	/// <param name=""><ничего не принимает>
+	/// <returns><возвращает вектор новых €чеек, центры которых наход€тс€ на оси>
+	vector <Kyb*> Get_projection(void);
+	double linear_funk(const double& x1, const double& y1, const double& x2, const double& y2, const double& t);
 
 
 

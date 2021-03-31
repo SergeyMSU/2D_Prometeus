@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 
 using namespace std;
@@ -208,6 +209,8 @@ void Konstruktor::print_Tecplot(void)
 	double p_o = 1.0;   // Размер давления
 	double u_o = 1.0;   // Размер давления
 
+	auto res = this->Get_projection();
+
 
 	ofstream fout;
 	string name_f = "2D_tecplot.txt";
@@ -228,6 +231,21 @@ void Konstruktor::print_Tecplot(void)
 				<< i->u * u_o << " " << i->v * u_o << " " << Max << " "  << QQ << endl;
 		
 	}
+	for (auto& i : res)
+	{
+		double Max = 0.0;
+		double QQ = 0.0;
+		if (i->ro > 0.000000000001)
+		{
+			QQ = i->Q / i->ro;
+			Max = sqrt(kvv(i->u, i->v, 0.0) / (ggg * i->p / i->ro));
+		}
+
+		fout << i->x * r_o << " " << i->y * r_o << " " << sqrt(i->x * r_o * i->x * r_o + i->y * r_o * i->y * r_o) << //
+			" " << i->ro * ro_o << " " << i->p * p_o << " " //
+			<< i->u * u_o << " " << i->v * u_o << " " << Max << " " << QQ << endl;
+
+	}
 	fout.close();
 }
 
@@ -239,6 +257,7 @@ void Konstruktor::print_Tecplot_multifluid(void)
 	double p_o = 1.0;   // Размер давления
 	double u_o = 10.38;   // Размер давления
 
+	auto res = this->Get_projection();
 
 	ofstream fout;
 	string name_f = "2D_tecplot_multifluid.txt";
@@ -265,6 +284,52 @@ void Konstruktor::print_Tecplot_multifluid(void)
 			i->ro_H4 * ro_o_H << " " << i->p_H4 * p_o << " " << i->u_H4 * u_o << " " << i->v_H4 * u_o << " " << //
 			(i->ro_H1 + i->ro_H2 + i->ro_H3 + i->ro_H4) * ro_o_H  << endl;
 
+	}
+	for (auto& i : res)
+	{
+		double Max = 0.0;
+		double QQ = 0.0;
+		if (i->ro > 0.000000000001)
+		{
+			QQ = i->Q / i->ro;
+			Max = sqrt(kvv(i->u, i->v, 0.0) / (ggg * i->p / i->ro));
+		}
+
+		fout << i->x * r_o << " " << 0.0 << " " << sqrt(i->x * r_o * i->x * r_o + i->y * r_o * i->y * r_o) << //
+			" " << i->ro * ro_o << " " << i->p * p_o << " " //
+			<< i->u * u_o << " " << i->v * u_o << " " << Max << " " << QQ << " " << //
+			i->ro_H1 * ro_o_H << " " << i->p_H1 * p_o << " " << i->u_H1 * u_o << " " << i->v_H1 * u_o << " " << //
+			i->ro_H2 * ro_o_H << " " << i->p_H2 * p_o << " " << i->u_H2 * u_o << " " << i->v_H2 * u_o << " " << //
+			i->ro_H3 * ro_o_H << " " << i->p_H3 * p_o << " " << i->u_H3 * u_o << " " << i->v_H3 * u_o << " " << //
+			i->ro_H4 * ro_o_H << " " << i->p_H4 * p_o << " " << i->u_H4 * u_o << " " << i->v_H4 * u_o << " " << //
+			(i->ro_H1 + i->ro_H2 + i->ro_H3 + i->ro_H4) * ro_o_H << endl;
+
+	}
+	fout.close();
+
+	name_f = "1D_tecplot_multifluid.txt";
+	fout.open(name_f);
+	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\"," << //
+		"\"Ro_H1\", \"P_H1\", \"Vx_H1\", \"Vy_H1\",\"Ro_H2\", \"P_H2\", \"Vx_H2\", \"Vy_H2\",\"Ro_H3\", \"P_H3\", \"Vx_H3\", \"Vy_H3\"," << //
+		"\"Ro_H4\", \"P_H4\", \"Vx_H4\", \"Vy_H4\", \"Ro_H\", " << "ZONE T = \"HP\"" << endl;
+
+	for (auto& i : res)
+	{
+		double Max = 0.0;
+		double QQ = 0.0;
+		if (i->ro > 0.000000000001)
+		{
+			QQ = i->Q / i->ro;
+			Max = sqrt(kvv(i->u, i->v, 0.0) / (ggg * i->p / i->ro));
+		}
+
+		fout << i->x * r_o << " " << i->ro * ro_o << " " << i->p * p_o << " " //
+			<< i->u * u_o << " " << i->v * u_o << " " << Max << " " << QQ << " " << //
+			i->ro_H1 * ro_o_H << " " << i->p_H1 * p_o << " " << i->u_H1 * u_o << " " << i->v_H1 * u_o << " " << //
+			i->ro_H2 * ro_o_H << " " << i->p_H2 * p_o << " " << i->u_H2 * u_o << " " << i->v_H2 * u_o << " " << //
+			i->ro_H3 * ro_o_H << " " << i->p_H3 * p_o << " " << i->u_H3 * u_o << " " << i->v_H3 * u_o << " " << //
+			i->ro_H4 * ro_o_H << " " << i->p_H4 * p_o << " " << i->u_H4 * u_o << " " << i->v_H4 * u_o << " " << //
+			(i->ro_H1 + i->ro_H2 + i->ro_H3 + i->ro_H4) * ro_o_H << endl;
 	}
 	fout.close();
 }
@@ -721,7 +786,7 @@ void Konstruktor::initial_condition()
 {
 	for (auto& i : this->all_Kyb)
 	{
-		i->ro_H1 = 0.000001;
+		/*i->ro_H1 = 0.000001;
 		i->p_H1 = 0.00000001;
 		i->u_H1 = 0.0;
 		i->v_H1 = 0.0;
@@ -736,39 +801,38 @@ void Konstruktor::initial_condition()
 		i->ro_H4 = 0.000001;
 		i->p_H4 = 0.00000001;
 		i->u_H4 = 0.0;
-		i->v_H4 = 0.0;
+		i->v_H4 = 0.0;*/
 		double dist = sqrt(i->x * i->x + i->y * i->y);
 		double r_0 = 1.0;
 		double ro = (389.988 * 389.988) / (chi_ * chi_);
 		double P_E = ro * chi_ * chi_ / (ggg * 0.25 * 0.25);
-		/*if (dist < 1.0)
+		if (dist <= 1.0)
 		{
 			i->ro = ro;
 			i->p = P_E;
-			i->u = chi_ * i->x;
-			i->v = chi_ * i->y;
-			i->Q = ro ;
+			i->u = chi_ * i->x / dist;
+			i->v = chi_ * i->y / dist;
+			i->Q = ro * r_0 * r_0;
 
-			i->ro_H1 = ((sigma(chi_) * 389.988) / (2.0 * Kn_ * chi_));
-			i->p_H1 = 0.00000001;
-			i->u_H1 = chi_ * i->x;
-			i->v_H1 = chi_ * i->y;
-		}
-		else */
-		if (dist > Distant * 1.5)
-		{
-			i->ro = 1.0;
-			i->p = 1.0;
-			i->u = Velosity_inf;
-			i->v = 0.0;
-			i->Q = 100.0;
+			i->ro_H1 = ((sigma(chi_) * 389.988) / (2.0 * Kn_ * chi_)) * (1.0 - 0.1 /1.0);
+			i->p_H1 = 0.000001;
+			i->u_H1 = chi_ * i->x / dist;
+			i->v_H1 = chi_ * i->y / dist;
 
-			i->ro_H4 = 1.0;
-			i->p_H4 = 0.5;
-			i->u_H4 = Velosity_inf;
+			i->ro_H2 = 0.000001;
+			i->p_H2 = 0.00000001;
+			i->u_H2 = 0.0;
+			i->v_H2 = 0.0;
+			i->ro_H3 = 0.000001;
+			i->p_H3 = 0.00000001;
+			i->u_H3 = 0.0;
+			i->v_H3 = 0.0;
+			i->ro_H4 = 0.000001;
+			i->p_H4 = 0.00000001;
+			i->u_H4 = 0.0;
 			i->v_H4 = 0.0;
 		}
-		else
+		else if (dist <= 1.2 * Distant)
 		{
 			i->ro = ro / (dist * dist);
 			i->p = P_E * pow(r_0 / dist, 2.0 * ggg);
@@ -776,8 +840,12 @@ void Konstruktor::initial_condition()
 			i->v = chi_ * i->y / dist;
 			i->Q = ro * r_0 * r_0 / (dist * dist);
 
-			i->ro_H1 = ((sigma(chi_) * 389.988) / (2.0 * Kn_ * chi_)) * (1.0 / dist - 0.01 / kv(dist));
-			i->p_H1 = 0.00000001;
+			i->ro_H1 = ((sigma(chi_) * 389.988) / (2.0 * Kn_ * chi_))* (1.0 / dist - 0.1 / kv(dist));
+			if (i->ro_H1 <= 0.0)
+			{
+				i->ro_H1 = 0.000001;
+			}
+			i->p_H1 = 0.000001;
 			i->u_H1 = chi_ * i->x / dist;
 			i->v_H1 = chi_ * i->y / dist;
 		}
@@ -888,4 +956,79 @@ void Konstruktor::Download_setka_multifluid(string name)
 	}
 
 	fout.close();
+}
+
+double Konstruktor::linear_funk(const double& x1, const double& y1, const double& x2, const double& y2, const double& t)
+{
+	double k = (y1 - y2) / (x1 - x2);
+	double b = (y1 * x2 - y2 * x1) / (x2 - x1);
+	return k * t + b;
+}
+
+vector <Kyb*> Konstruktor::Get_projection(void)
+{
+	vector <Kyb*> Boandary;
+	vector <Kyb*> res;
+
+	for (auto& i : this->all_Kyb)
+	{
+		for (auto& j : i->sosed)
+		{
+			if (j->number == -4)
+			{
+				Boandary.push_back(i);
+				break;
+			}
+		}
+	}
+
+	sort(Boandary.begin(), Boandary.end(), [](Kyb* i, Kyb* j)
+		{
+			return (i->x < j->x);
+		});
+
+	double dy_1, dy_2;
+	for (auto& i : Boandary)
+	{
+		dy_1 = (this->DY / pow(2, i->size - 1)) / 2.0;   // Половина ширины ячейки
+		for (auto& j : i->sosed)
+		{
+			dy_2 = (this->DY / pow(2, j->size - 1)) / 2.0;   // Половина ширины ячейки
+			if (fabs(fabs(j->y - i->y) - dy_1 - dy_2) < dy_1 * 0.001 && j->y > i->y)
+			{
+				auto C1 = new Kyb(i->x, 0.0);
+				C1->ro = linear_funk(i->y, i->ro, j->y, j->ro, 0.0);
+				C1->p = linear_funk(i->y, i->p, j->y, j->p, 0.0);
+				C1->u = linear_funk(i->y, i->u, j->y, j->u, 0.0);
+				C1->v = linear_funk(i->y, i->v, j->y, j->v, 0.0);
+				C1->Q = linear_funk(i->y, i->Q, j->y, j->Q, 0.0);
+
+				C1->ro_H1 = linear_funk(i->y, i->ro_H1, j->y, j->ro_H1, 0.0);
+				C1->p_H1 = linear_funk(i->y, i->p_H1, j->y, j->p_H1, 0.0);
+				C1->u_H1 = linear_funk(i->y, i->u_H1, j->y, j->u_H1, 0.0);
+				C1->v_H1 = linear_funk(i->y, i->v_H1, j->y, j->v_H1, 0.0);
+
+				C1->ro_H2 = linear_funk(i->y, i->ro_H2, j->y, j->ro_H2, 0.0);
+				C1->p_H2 = linear_funk(i->y, i->p_H2, j->y, j->p_H2, 0.0);
+				C1->u_H2 = linear_funk(i->y, i->u_H2, j->y, j->u_H2, 0.0);
+				C1->v_H2 = linear_funk(i->y, i->v_H2, j->y, j->v_H2, 0.0);
+
+				C1->ro_H3 = linear_funk(i->y, i->ro_H3, j->y, j->ro_H3, 0.0);
+				C1->p_H3 = linear_funk(i->y, i->p_H3, j->y, j->p_H3, 0.0);
+				C1->u_H3 = linear_funk(i->y, i->u_H3, j->y, j->u_H3, 0.0);
+				C1->v_H3 = linear_funk(i->y, i->v_H3, j->y, j->v_H3, 0.0);
+
+				C1->ro_H4 = linear_funk(i->y, i->ro_H4, j->y, j->ro_H4, 0.0);
+				C1->p_H4 = linear_funk(i->y, i->p_H4, j->y, j->p_H4, 0.0);
+				C1->u_H4 = linear_funk(i->y, i->u_H4, j->y, j->u_H4, 0.0);
+				C1->v_H4 = linear_funk(i->y, i->v_H4, j->y, j->v_H4, 0.0);
+
+				res.push_back(C1);
+				break;
+			}
+		}
+
+	}
+
+	return res;
 }

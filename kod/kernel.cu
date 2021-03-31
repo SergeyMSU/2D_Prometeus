@@ -50,8 +50,9 @@ int main()
     K.Drobim(0, 0, 0, 20);
 
 
+    //K.print_konectiviti_short();
+    K.Download_setka_multifluid("all_save_8_multifluid.txt");
     K.initial_condition();   // Заполнение начальными условиями
-    K.Download_setka_multifluid("all_save_4_multifluid.txt");
     //K.print_cell();
 
 
@@ -992,7 +993,7 @@ cudaError_t addWithCuda_5_komponent(Konstruktor& K)
 
     cout << "Start programm" << endl;
     met = 1;
-    for (int i = 0; i < 250000; i = i + 2)  // Сколько шагов по времени делаем?
+    for (int i = 0; i < 3600000; i = i + 2)  // Сколько шагов по времени делаем?
     {
         if (i > 550000)
         {
@@ -1043,9 +1044,6 @@ cudaError_t addWithCuda_5_komponent(Konstruktor& K)
         }
 
     }
-
-
-    // Копирование массивов обратно
     if (true)
     {
         cudaStatus = cudaMemcpy(host_ro1, dev_ro1, N * sizeof(double), cudaMemcpyDeviceToHost);
@@ -1095,7 +1093,7 @@ cudaError_t addWithCuda_5_komponent(Konstruktor& K)
     K.read_Cuda_massiv(host_ro1, host_p1, host_u1, host_v1, host_Q1, host_ro1_H1, host_p1_H1, host_u1_H1, host_v1_H1, //
         host_ro1_H2, host_p1_H2, host_u1_H2, host_v1_H2, host_ro1_H3, host_p1_H3, host_u1_H3, host_v1_H3, host_ro1_H4, host_p1_H4, host_u1_H4, host_v1_H4);
     K.print_Tecplot_multifluid();
-    K.Save_setka_multifluid("all_save_5_multifluid.txt");
+    K.Save_setka_multifluid("all_save_9_multifluid.txt");
 
 
 

@@ -587,26 +587,26 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
 
             if (radius > Distant)
             {
-                tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H1, 1.0, p_H1, u_H1, v_H1, ro2_H1, 1.0, p2_H1, u2_H1, v2_H1, P, PQ, n1, n2, dist, metod));
+                tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H1, 1.0, p_H1, u_H1, v_H1, ro2_H1, 1.0, p2_H1, u2_H1, v2_H1, P, PQ, n1, n2, dist, 0));
                 for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
                 {
                     Potok_H1[k] = Potok_H1[k] + P[k] * S;
                 }
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H2, 1.0, p_H2, u_H2, v_H2, ro2_H2, 1.0, p2_H2, u2_H2, v2_H2, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H2, 1.0, p_H2, u_H2, v_H2, ro2_H2, 1.0, p2_H2, u2_H2, v2_H2, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H2[k] = Potok_H2[k] + P[k] * S;
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H3, 1.0, p_H3, u_H3, v_H3, ro2_H3, 1.0, p2_H3, u2_H3, v2_H3, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H3, 1.0, p_H3, u_H3, v_H3, ro2_H3, 1.0, p2_H3, u2_H3, v2_H3, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H3[k] = Potok_H3[k] + P[k] * S;
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H4, 1.0, p_H4, u_H4, v_H4, ro2_H4, 1.0, p2_H4, u2_H4, v2_H4, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H4, 1.0, p_H4, u_H4, v_H4, ro2_H4, 1.0, p2_H4, u2_H4, v2_H4, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H4[k] = Potok_H4[k] + P[k] * S;
@@ -630,25 +630,25 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
             n2 = 0.0;
             dist = dx;
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H1, 1.0, p_H1, u_H1, v_H1, ro_H1, 1.0, p_H1, u_H1, v_H1, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H1, 1.0, p_H1, u_H1, v_H1, ro_H1, 1.0, p_H1, u_H1, v_H1, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H1[k] = Potok_H1[k] + P[k] * S;
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H2, 1.0, p_H2, u_H2, v_H2, ro_H2, 1.0, p_H2, u_H2, v_H2, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H2, 1.0, p_H2, u_H2, v_H2, ro_H2, 1.0, p_H2, u_H2, v_H2, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H2[k] = Potok_H2[k] + P[k] * S;
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H3, 1.0, p_H3, u_H3, v_H3, ro_H3, 1.0, p_H3, u_H3, v_H3, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H3, 1.0, p_H3, u_H3, v_H3, ro_H3, 1.0, p_H3, u_H3, v_H3, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H3[k] = Potok_H3[k] + P[k] * S;
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H4, 1.0, p_H4, u_H4, v_H4, roC, 1.0, 0.5 * pC, Velosity_inf, 0.0, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H4, 1.0, p_H4, u_H4, v_H4, roC, 1.0, 0.5 * pC, Velosity_inf, 0.0, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H4[k] = Potok_H4[k] + P[k] * S;
@@ -675,26 +675,26 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
                 uu = Velosity_inf;
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H1, 1.0, p_H1, u_H1, v_H1, ro_H1, 1.0, p_H1, u_H1, v_H1, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H1, 1.0, p_H1, u_H1, v_H1, ro_H1, 1.0, p_H1, u_H1, v_H1, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H1[k] = Potok_H1[k] + P[k] * S;
             }
 
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H2, 1.0, p_H2, u_H2, v_H2, ro_H2, 1.0, p_H2, u_H2, v_H2, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H2, 1.0, p_H2, u_H2, v_H2, ro_H2, 1.0, p_H2, u_H2, v_H2, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H2[k] = Potok_H2[k] + P[k] * S;
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H3, 1.0, p_H3, u_H3, v_H3, ro_H3, 1.0, p_H3, u_H3, v_H3, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H3, 1.0, p_H3, u_H3, v_H3, ro_H3, 1.0, p_H3, u_H3, v_H3, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H3[k] = Potok_H3[k] + P[k] * S;
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H4, 1.0, p_H4, u_H4, v_H4, ro_H4, 1.0, p_H4, u_H4, v_H4, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H4, 1.0, p_H4, u_H4, v_H4, ro_H4, 1.0, p_H4, u_H4, v_H4, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H4[k] = Potok_H4[k] + P[k] * S;
@@ -717,26 +717,26 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
             n2 = 1.0;
             dist = dy;
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H1, 1.0, p_H1, u_H1, v_H1, ro_H1, 1.0, p_H1, u_H1, v_H1, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H1, 1.0, p_H1, u_H1, v_H1, ro_H1, 1.0, p_H1, u_H1, v_H1, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H1[k] = Potok_H1[k] + P[k] * S;
             }
 
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H2, 1.0, p_H2, u_H2, v_H2, ro_H2, 1.0, p_H2, u_H2, v_H2, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H2, 1.0, p_H2, u_H2, v_H2, ro_H2, 1.0, p_H2, u_H2, v_H2, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H2[k] = Potok_H2[k] + P[k] * S;
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H3, 1.0, p_H3, u_H3, v_H3, ro_H3, 1.0, p_H3, u_H3, v_H3, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H3, 1.0, p_H3, u_H3, v_H3, ro_H3, 1.0, p_H3, u_H3, v_H3, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H3[k] = Potok_H3[k] + P[k] * S;
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H4, 1.0, p_H4, u_H4, v_H4, ro_H4, 1.0, p_H4, u_H4, v_H4, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H4, 1.0, p_H4, u_H4, v_H4, ro_H4, 1.0, p_H4, u_H4, v_H4, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H4[k] = Potok_H4[k] + P[k] * S;
@@ -771,26 +771,26 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
 
             if (radius > Distant)
             {
-                tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H1, 1.0, p_H1, u_H1, v_H1, ro_H1, 1.0, p_H1, u_H1, -v_H1, P, PQ, n1, n2, dist, metod));
+                tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H1, 1.0, p_H1, u_H1, v_H1, ro_H1, 1.0, p_H1, u_H1, -v_H1, P, PQ, n1, n2, dist, 0));
                 for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
                 {
                     Potok_H1[k] = Potok_H1[k] + P[k] * S;
                 }
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H2, 1.0, p_H2, u_H2, v_H2, ro_H2, 1.0, p_H2, u_H2, -v_H2, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H2, 1.0, p_H2, u_H2, v_H2, ro_H2, 1.0, p_H2, u_H2, -v_H2, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H2[k] = Potok_H2[k] + P[k] * S;
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H3, 1.0, p_H3, u_H3, v_H3, ro_H3, 1.0, p_H3, u_H3, -v_H3, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H3, 1.0, p_H3, u_H3, v_H3, ro_H3, 1.0, p_H3, u_H3, -v_H3, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H3[k] = Potok_H3[k] + P[k] * S;
             }
 
-            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H4, 1.0, p_H4, u_H4, v_H4, ro_H4, 1.0, p_H4, u_H4, -v_H4, P, PQ, n1, n2, dist, metod));
+            tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H4, 1.0, p_H4, u_H4, v_H4, ro_H4, 1.0, p_H4, u_H4, -v_H4, P, PQ, n1, n2, dist, 0));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
             {
                 Potok_H4[k] = Potok_H4[k] + P[k] * S;
@@ -911,7 +911,7 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
     {
         k3 = 0;
         k4 = 0;
-        if (((kv(u) + kv(v)) / (ggg * p / ro) > 1.3) || ((dist <= Distant)))
+        if ( ((kv(u) + kv(v)) / (ggg * p / ro) > 1.3) || ((radius <= Distant)))
         {
             k1 = 1;
             k2 = 0;
@@ -977,7 +977,7 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
         if (ro3 <= 0)
         {
             printf("Problemsssss  ro H1 < 0! %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf\n", x, y, dx, dy, ro_H1, p_H1, u_H1, v_H1);
-            ro3 = 0.00001;
+            ro3 = 0.0000001;
         }
         u3 = (ro_H1 * u_H1 - *T_do * (Potok_H1[1] / Volume + ro_H1 * v_H1 * u_H1 / y - q21_H1)) / ro3;
         v3 = (ro_H1 * v_H1 - *T_do * (Potok_H1[2] / Volume + ro_H1 * v_H1 * v_H1 / y - q22_H1)) / ro3;
@@ -1008,7 +1008,7 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
         if (ro3 <= 0)
         {
             printf("Problemsssss  ro H2 < 0! %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf\n", x, y, dx, dy, ro_H2, p_H2, u_H2, v_H2);
-            ro3 = 0.00001;
+            ro3 = 0.000001;
         }
         u3 = (ro_H2 * u_H2 - *T_do * (Potok_H2[1] / Volume + ro_H2 * v_H2 * u_H2 / y - q21_H2)) / ro3;
         v3 = (ro_H2 * v_H2 - *T_do * (Potok_H2[2] / Volume + ro_H2 * v_H2 * v_H2 / y - q22_H2)) / ro3;
@@ -1039,7 +1039,7 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
         if (ro3 <= 0.0)
         {
             printf("Problemsssss  ro H3 < 0! %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf\n", x, y, dx, dy, ro_H3, p_H3, u_H3, v_H3);
-            ro3 = 0.00001;
+            ro3 = 0.000001;
         }
         u3 = (ro_H3 * u_H3 - *T_do * (Potok_H3[1] / Volume + ro_H3 * v_H3 * u_H3 / y - q21_H3)) / ro3;
         v3 = (ro_H3 * v_H3 - *T_do * (Potok_H3[2] / Volume + ro_H3 * v_H3 * v_H3 / y - q22_H3)) / ro3;
