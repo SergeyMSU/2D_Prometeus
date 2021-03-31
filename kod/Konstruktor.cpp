@@ -231,6 +231,44 @@ void Konstruktor::print_Tecplot(void)
 	fout.close();
 }
 
+void Konstruktor::print_Tecplot_multifluid(void)
+{
+	double r_o = 1.0;    // Размер расстояния
+	double ro_o = 0.06;   // Размер плотности
+	double ro_o_H = 0.18;   // Размер плотности
+	double p_o = 1.0;   // Размер давления
+	double u_o = 10.38;   // Размер давления
+
+
+	ofstream fout;
+	string name_f = "2D_tecplot_multifluid.txt";
+	fout.open(name_f);
+	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Y\", \"r\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\"," << //
+		"\"Ro_H1\", \"P_H1\", \"Vx_H1\", \"Vy_H1\",\"Ro_H2\", \"P_H2\", \"Vx_H2\", \"Vy_H2\",\"Ro_H3\", \"P_H3\", \"Vx_H3\", \"Vy_H3\"," << //
+		"\"Ro_H4\", \"P_H4\", \"Vx_H4\", \"Vy_H4\", \"Ro_H\", " << "ZONE T = \"HP\"" << endl;
+	for (auto& i : this->all_Kyb)
+	{
+		double Max = 0.0;
+		double QQ = 0.0;
+		if (i->ro > 0.000000000001)
+		{
+			QQ = i->Q / i->ro;
+			Max = sqrt(kvv(i->u, i->v, 0.0) / (ggg * i->p / i->ro));
+		}
+
+		fout << i->x * r_o << " " << i->y * r_o << " " << sqrt(i->x * r_o * i->x * r_o + i->y * r_o * i->y * r_o) << //
+			" " << i->ro * ro_o << " " << i->p * p_o << " " //
+			<< i->u * u_o << " " << i->v * u_o << " " << Max << " " << QQ << " " << //
+			i->ro_H1 * ro_o_H << " " << i->p_H1 * p_o << " "<< i->u_H1 * u_o << " " << i->v_H1 * u_o << " " << //
+			i->ro_H2 * ro_o_H << " " << i->p_H2 * p_o << " " << i->u_H2 * u_o << " " << i->v_H2 * u_o << " " << //
+			i->ro_H3 * ro_o_H << " " << i->p_H3 * p_o << " " << i->u_H3 * u_o << " " << i->v_H3 * u_o << " " << //
+			i->ro_H4 * ro_o_H << " " << i->p_H4 * p_o << " " << i->u_H4 * u_o << " " << i->v_H4 * u_o << " " << //
+			(i->ro_H1 + i->ro_H2 + i->ro_H3 + i->ro_H4) * ro_o_H  << endl;
+
+	}
+	fout.close();
+}
+
 bool Konstruktor::sosed_or_not(Kyb* A, Kyb* B)
 {
 	if (B->number < 0)
@@ -683,10 +721,40 @@ void Konstruktor::initial_condition()
 {
 	for (auto& i : this->all_Kyb)
 	{
+		i->ro_H1 = 0.000001;
+		i->p_H1 = 0.00000001;
+		i->u_H1 = 0.0;
+		i->v_H1 = 0.0;
+		i->ro_H2 = 0.000001;
+		i->p_H2 = 0.00000001;
+		i->u_H2 = 0.0;
+		i->v_H2 = 0.0;
+		i->ro_H3 = 0.000001;
+		i->p_H3 = 0.00000001;
+		i->u_H3 = 0.0;
+		i->v_H3 = 0.0;
+		i->ro_H4 = 0.000001;
+		i->p_H4 = 0.00000001;
+		i->u_H4 = 0.0;
+		i->v_H4 = 0.0;
 		double dist = sqrt(i->x * i->x + i->y * i->y);
 		double r_0 = 1.0;
 		double ro = (389.988 * 389.988) / (chi_ * chi_);
 		double P_E = ro * chi_ * chi_ / (ggg * 0.25 * 0.25);
+		/*if (dist < 1.0)
+		{
+			i->ro = ro;
+			i->p = P_E;
+			i->u = chi_ * i->x;
+			i->v = chi_ * i->y;
+			i->Q = ro ;
+
+			i->ro_H1 = ((sigma(chi_) * 389.988) / (2.0 * Kn_ * chi_));
+			i->p_H1 = 0.00000001;
+			i->u_H1 = chi_ * i->x;
+			i->v_H1 = chi_ * i->y;
+		}
+		else */
 		if (dist > Distant * 1.5)
 		{
 			i->ro = 1.0;
@@ -694,6 +762,11 @@ void Konstruktor::initial_condition()
 			i->u = Velosity_inf;
 			i->v = 0.0;
 			i->Q = 100.0;
+
+			i->ro_H4 = 1.0;
+			i->p_H4 = 0.5;
+			i->u_H4 = Velosity_inf;
+			i->v_H4 = 0.0;
 		}
 		else
 		{
@@ -702,6 +775,11 @@ void Konstruktor::initial_condition()
 			i->u = chi_ * i->x / dist;
 			i->v = chi_ * i->y / dist;
 			i->Q = ro * r_0 * r_0 / (dist * dist);
+
+			i->ro_H1 = ((sigma(chi_) * 389.988) / (2.0 * Kn_ * chi_)) * (1.0 / dist - 0.01 / kv(dist));
+			i->p_H1 = 0.00000001;
+			i->u_H1 = chi_ * i->x / dist;
+			i->v_H1 = chi_ * i->y / dist;
 		}
 	}
 }
@@ -715,6 +793,38 @@ void Konstruktor::read_Cuda_massiv(double* ro, double* p, double* u, double* v, 
 		this->all_Kyb[i]->u = u[i];
 		this->all_Kyb[i]->v = v[i];
 		this->all_Kyb[i]->Q = QQ[i];
+	}
+}
+
+void Konstruktor::read_Cuda_massiv(double* ro, double* p, double* u, double* v, double* QQ,//
+	double* ro_H1, double* p_H1, double* u_H1, double* v_H1,//
+	double* ro_H2, double* p_H2, double* u_H2, double* v_H2, //
+	double* ro_H3, double* p_H3, double* u_H3, double* v_H3, //
+	double* ro_H4, double* p_H4, double* u_H4, double* v_H4)
+{
+	for (int i = 0; i < this->all_Kyb.size(); i++)
+	{
+		this->all_Kyb[i]->ro = ro[i];
+		this->all_Kyb[i]->p = p[i];
+		this->all_Kyb[i]->u = u[i];
+		this->all_Kyb[i]->v = v[i];
+		this->all_Kyb[i]->Q = QQ[i];
+		this->all_Kyb[i]->ro_H1 = ro_H1[i];
+		this->all_Kyb[i]->p_H1 = p_H1[i];
+		this->all_Kyb[i]->u_H1 = u_H1[i];
+		this->all_Kyb[i]->v_H1 = v_H1[i];
+		this->all_Kyb[i]->ro_H2 = ro_H2[i];
+		this->all_Kyb[i]->p_H2 = p_H2[i];
+		this->all_Kyb[i]->u_H2 = u_H2[i];
+		this->all_Kyb[i]->v_H2 = v_H2[i];
+		this->all_Kyb[i]->ro_H3 = ro_H3[i];
+		this->all_Kyb[i]->p_H3 = p_H3[i];
+		this->all_Kyb[i]->u_H3 = u_H3[i];
+		this->all_Kyb[i]->v_H3 = v_H3[i];
+		this->all_Kyb[i]->ro_H4 = ro_H4[i];
+		this->all_Kyb[i]->p_H4 = p_H4[i];
+		this->all_Kyb[i]->u_H4 = u_H4[i];
+		this->all_Kyb[i]->v_H4 = v_H4[i];
 	}
 }
 
@@ -732,6 +842,25 @@ void Konstruktor::Save_setka(string name)
 	fout.close();
 }
 
+void Konstruktor::Save_setka_multifluid(string name)
+{
+	int ll = this->all_Kyb.size();
+	ofstream fout;
+	fout.open(name);
+
+	for (auto& i : this->all_Kyb)
+	{
+		fout << i->ro << " " << i->p << " " << i->u << " " << i->v << " " << i->Q << " " << //
+			i->ro_H1 << " " << i->p_H1 << " " << i->u_H1 << " " << i->v_H1 << " " << //
+			i->ro_H2 << " " << i->p_H2 << " " << i->u_H2 << " " << i->v_H2 << " " << //
+			i->ro_H3 << " " << i->p_H3 << " " << i->u_H3 << " " << i->v_H3 << " " << //
+			i->ro_H4 << " " << i->p_H4 << " " << i->u_H4 << " " << i->v_H4 << endl;
+
+	}
+
+	fout.close();
+}
+
 void Konstruktor::Download_setka(string name)
 {
 	int ll = this->all_Kyb.size();
@@ -741,6 +870,21 @@ void Konstruktor::Download_setka(string name)
 	for (auto& i : this->all_Kyb)
 	{
 		fout >> i->ro >> i->p >>  i->u >>  i->v >> i->Q;
+	}
+
+	fout.close();
+}
+
+void Konstruktor::Download_setka_multifluid(string name)
+{
+	int ll = this->all_Kyb.size();
+	ifstream fout;
+	fout.open(name);
+
+	for (auto& i : this->all_Kyb)
+	{
+		fout >> i->ro >> i->p >> i->u >> i->v >> i->Q >> i->ro_H1 >> i->p_H1 >> i->u_H1 >> i->v_H1 >> //
+			i->ro_H2 >> i->p_H2 >> i->u_H2 >> i->v_H2 >> i->ro_H3 >> i->p_H3 >> i->u_H3 >> i->v_H3 >> i->ro_H4 >> i->p_H4 >> i->u_H4 >> i->v_H4;
 	}
 
 	fout.close();

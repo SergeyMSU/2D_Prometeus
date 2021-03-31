@@ -200,7 +200,7 @@ __device__ double HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, co
     double ptz = (ptzR + ptzL) / 2.0;
 
 
-    if( fabs(v1 - v2) > 0.1)
+    /*if( fabs(v1 - v2) > 0.1)
     {
         vLL = v1;
         vRR = v2;
@@ -209,8 +209,10 @@ __device__ double HLLC_2d_Korolkov_b_s(const double& ro_L, const double& Q_L, co
     {
         vRR = UZ2 / UZ0;
         vLL = vRR;
-    }
+    }*/
 
+    vRR = UZ2 / UZ0;
+    vLL = vRR;
 
     ee2 = e2 * suRm + (ptz * SM - p_R * u2) / (SR - SM);
     ee1 = e1 * suLm + (ptz * SM - p_L * u1) / (SL - SM);
@@ -678,7 +680,7 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
             {
                 Potok_H1[k] = Potok_H1[k] + P[k] * S;
             }
-            
+
 
             tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H2, 1.0, p_H2, u_H2, v_H2, ro_H2, 1.0, p_H2, u_H2, v_H2, P, PQ, n1, n2, dist, metod));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
@@ -706,7 +708,7 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
                 Potok[k] = Potok[k] + P[k] * S;
             }
             Potok[4] = Potok[4] + PQ * S;
-            
+
         }
         else if (ii == -3)
         {
@@ -720,7 +722,7 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
             {
                 Potok_H1[k] = Potok_H1[k] + P[k] * S;
             }
-            
+
 
             tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro_H2, 1.0, p_H2, u_H2, v_H2, ro_H2, 1.0, p_H2, u_H2, v_H2, P, PQ, n1, n2, dist, metod));
             for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
@@ -748,7 +750,7 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
                 Potok[k] = Potok[k] + P[k] * S;
             }
             Potok[4] = Potok[4] + PQ * S;
-            
+
         }
         else if (ii == -4)
         {
@@ -819,32 +821,283 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
     double nu_H1, nu_H2, nu_H3, nu_H4;
     double q2_1, q2_2, q3;
 
-    /// «десь остановились вчера!!!
+    U_M_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (64.0 / (9.0 * pi)) //
+        * (p / ro + 2.0 * p_H1 / ro_H1));
+    U_M_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (64.0 / (9.0 * pi)) //
+        * (p / ro + 2.0 * p_H2 / ro_H2));
+    U_M_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (64.0 / (9.0 * pi)) //
+        * (p / ro + 2.0 * p_H3 / ro_H3));
+    U_M_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (64.0 / (9.0 * pi)) //
+        * (p / ro + 2.0 * p_H4 / ro_H4));
 
+    U_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (4.0 / pi) //
+        * (p / ro + 2.0 * p_H1 / ro_H1));
+    U_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (4.0 / pi) //
+        * (p / ro + 2.0 * p_H2 / ro_H2));
+    U_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (4.0 / pi) //
+        * (p / ro + 2.0 * p_H3 / ro_H3));
+    U_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (4.0 / pi) //
+        * (p / ro + 2.0 * p_H4 / ro_H4));
+
+    sigma_H1 = kv(1.0 - a_2 * log(U_M_H1)); // 0.1243
+    sigma_H2 = kv(1.0 - a_2 * log(U_M_H2));
+    sigma_H3 = kv(1.0 - a_2 * log(U_M_H3)); // 0.1121     a_2
+    sigma_H4 = kv(1.0 - a_2 * log(U_M_H4));
+
+    nu_H1 = ro * ro_H1 * U_M_H1 * sigma_H1;
+    nu_H2 = ro * ro_H2 * U_M_H2 * sigma_H2;
+    nu_H3 = ro * ro_H3 * U_M_H3 * sigma_H3;
+    nu_H4 = ro * ro_H4 * U_M_H4 * sigma_H4;
+
+    q2_1 = (n_p_LISM_ / Kn_) * (nu_H1 * (u_H1 - u) + nu_H2 * (u_H2 - u) //
+        + nu_H3 * (u_H3 - u) + nu_H4 * (u_H4 - u));
+    q2_2 = (n_p_LISM_ / Kn_) * (nu_H1 * (v_H1 - v) + nu_H2 * (v_H2 - v) //
+        + nu_H3 * (v_H3 - v) + nu_H4 * (v_H4 - v));
+    q3 = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
+        (U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
+        nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
+            (U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
+        nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
+            (U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
+        nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
+            (U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
+
+
+    /*q2_1 = 0.0;
+    q2_2 = 0.0;
+    q3 = 0.0;*/
+
+    double ro2_p, p2_p, V1_p, V2_p, QQ2;
     double ro3, p3, u3, v3, Q33;
+    double kappa = Q / ro;
 
-    ro3 = ro - *T_do * (Potok[0] / Volume + ro * v / y);
-    Q33 = Q - (*T_do / Volume) * Potok[4] - *T_do * Q * v / y;
-    if (ro3 <= 0)
+    if (radius > Distant)
     {
-        printf("Problemsssss  ro < 0! %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf\n", x, y, dx, dy, ro, p, u, v, Q);
-        ro3 = 0.00001;
+        ro3 = ro - *T_do * (Potok[0] / Volume + ro * v / y);
+        Q33 = Q - (*T_do / Volume) * Potok[4] - *T_do * Q * v / y;
+        if (ro3 <= 0)
+        {
+            printf("Problemsssss  ro < 0! %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf\n", x, y, dx, dy, ro, p, u, v, Q);
+            ro3 = 0.00001;
+        }
+        u3 = (ro * u - *T_do * (Potok[1] / Volume + ro * v * u / y - q2_1)) / ro3;
+        v3 = (ro * v - *T_do * (Potok[2] / Volume + ro * v * v / y - q2_2)) / ro3;
+        p3 = (((p / (ggg - 1) + ro * (u * u + v * v) * 0.5) - *T_do * (Potok[3] / Volume + //
+            +v * (ggg * p / (ggg - 1) + ro * (u * u + v * v) * 0.5) / y - q3)) - //
+            0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+        if (p3 <= 0)
+        {
+            p3 = 0.000001;
+        }
+
+        Q2[index] = Q33;
+        RO2[index] = ro3;
+        P2[index] = p3;
+        U2[index] = u3;
+        V2[index] = v3;
     }
-    u3 = (ro * u - *T_do * (Potok[1] / Volume + ro * v * u / y)) / ro3;
-    v3 = (ro * v - *T_do * (Potok[2] / Volume + ro * v * v / y)) / ro3;
-    p3 = (((p / (ggg - 1) + ro * (u * u + v * v) * 0.5) - *T_do * (Potok[3] / Volume + //
-        +v * (ggg * p / (ggg - 1) + ro * (u * u + v * v) * 0.5) / y)) - //
-        0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
-    if (p3 <= 0)
+    else
     {
-        p3 = 0.000001;
+        Q2[index] = Q;
+        RO2[index] = ro;
+        P2[index] = p;
+        U2[index] = u;
+        V2[index] = v;
     }
 
-    Q2[index] = Q33;
-    RO2[index] = ro3;
-    P2[index] = p3;
-    U2[index] = u3;
-    V2[index] = v3;
+    int k1 = 0, k2 = 0, k3 = 0, k4 = 0;
+
+    if (kappa < 90)
+    {
+        k3 = 0;
+        k4 = 0;
+        if (((kv(u) + kv(v)) / (ggg * p / ro) > 1.3) || ((dist <= Distant)))
+        {
+            k1 = 1;
+            k2 = 0;
+        }
+        else
+        {
+            k1 = 0;
+            k2 = 1;
+        }
+    }
+    else
+    {
+        k1 = 0;
+        k2 = 0;
+        if (p / ro > 1.8)   // ( ((y < 8.0)&&(p / ro > (y * (-0.0238) + 0.36)))||( (y >= 8.0)&&(p / ro > 0.17) ) )
+        {
+            k4 = 0;
+            k3 = 1;
+        }
+        else
+        {
+            k3 = 0;
+            k4 = 1;
+        }
+    }
+
+    double S1, S2;
+    double q1_H1, q1_H2, q1_H3, q1_H4;
+    double q21_H1, q21_H2, q21_H3, q21_H4;
+    double q22_H1, q22_H2, q22_H3, q22_H4;
+    double q3_H1, q3_H2, q3_H3, q3_H4;
+
+    S1 = nu_H1 + nu_H2 + nu_H3 + nu_H4;
+    S2 = nu_H1 * ((kv(u) + kv(v)) / 2.0 + (U_H1 / U_M_H1) * (p / ro))//
+        + nu_H2 * ((kv(u) + kv(v)) / 2.0 + (U_H2 / U_M_H2) * (p / ro))//
+        + nu_H3 * ((kv(u) + kv(v)) / 2.0 + (U_H3 / U_M_H3) * (p / ro))//
+        + nu_H4 * ((kv(u) + kv(v)) / 2.0 + (U_H4 / U_M_H4) * (p / ro));
+
+    q1_H1 = (n_H_LISM_ / Kn_) * (k1 * S1 - nu_H1);
+    q1_H2 = (n_H_LISM_ / Kn_) * (k2 * S1 - nu_H2);
+    q1_H3 = (n_H_LISM_ / Kn_) * (k3 * S1 - nu_H3);
+    q1_H4 = (n_H_LISM_ / Kn_) * (k4 * S1 - nu_H4);
+
+    q21_H1 = (n_H_LISM_ / Kn_) * (k1 * S1 * u - nu_H1 * u_H1);
+    q21_H2 = (n_H_LISM_ / Kn_) * (k2 * S1 * u - nu_H2 * u_H2);
+    q21_H3 = (n_H_LISM_ / Kn_) * (k3 * S1 * u - nu_H3 * u_H3);
+    q21_H4 = (n_H_LISM_ / Kn_) * (k4 * S1 * u - nu_H4 * u_H4);
+
+    q22_H1 = (n_H_LISM_ / Kn_) * (k1 * S1 * v - nu_H1 * v_H1);
+    q22_H2 = (n_H_LISM_ / Kn_) * (k2 * S1 * v - nu_H2 * v_H2);
+    q22_H3 = (n_H_LISM_ / Kn_) * (k3 * S1 * v - nu_H3 * v_H3);
+    q22_H4 = (n_H_LISM_ / Kn_) * (k4 * S1 * v - nu_H4 * v_H4);
+
+    q3_H1 = (n_H_LISM_ / Kn_) * (k1 * S2 - nu_H1 * ((kv(u_H1) + kv(v_H1)) / 2.0 + (U_H1 / U_M_H1) * 2.0 * (p_H1 / ro_H1)));
+    q3_H2 = (n_H_LISM_ / Kn_) * (k2 * S2 - nu_H2 * ((kv(u_H2) + kv(v_H2)) / 2.0 + (U_H2 / U_M_H2) * 2.0 * (p_H2 / ro_H2)));
+    q3_H3 = (n_H_LISM_ / Kn_) * (k3 * S2 - nu_H3 * ((kv(u_H3) + kv(v_H3)) / 2.0 + (U_H3 / U_M_H3) * 2.0 * (p_H3 / ro_H3)));
+    q3_H4 = (n_H_LISM_ / Kn_) * (k4 * S2 - nu_H4 * ((kv(u_H4) + kv(v_H4)) / 2.0 + (U_H4 / U_M_H4) * 2.0 * (p_H4 / ro_H4)));
+    
+
+    if (radius > Distant)
+    {
+        ro3 = ro_H1 - *T_do * (Potok_H1[0] / Volume + ro_H1 * v_H1 / y - q1_H1);
+        if (ro3 <= 0)
+        {
+            printf("Problemsssss  ro H1 < 0! %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf\n", x, y, dx, dy, ro_H1, p_H1, u_H1, v_H1);
+            ro3 = 0.00001;
+        }
+        u3 = (ro_H1 * u_H1 - *T_do * (Potok_H1[1] / Volume + ro_H1 * v_H1 * u_H1 / y - q21_H1)) / ro3;
+        v3 = (ro_H1 * v_H1 - *T_do * (Potok_H1[2] / Volume + ro_H1 * v_H1 * v_H1 / y - q22_H1)) / ro3;
+        p3 = (((p_H1 / (ggg - 1) + ro_H1 * (u_H1 * u_H1 + v_H1 * v_H1) * 0.5) - *T_do * (Potok_H1[3] / Volume + //
+            +v_H1 * (ggg * p_H1 / (ggg - 1) + ro_H1 * (u_H1 * u_H1 + v_H1 * v_H1) * 0.5) / y - q3_H1)) - //
+            0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+        if (p3 <= 0)
+        {
+            p3 = 0.000001;
+        }
+
+        RO2_H1[index] = ro3;
+        P2_H1[index] = p3;
+        U2_H1[index] = u3;
+        V2_H1[index] = v3;
+    }
+    else
+    {
+        RO2_H1[index] = ro_H1;
+        P2_H1[index] = p_H1;
+        U2_H1[index] = u_H1;
+        V2_H1[index] = v_H1;
+    }
+
+    if (radius > 0.5)
+    {
+        ro3 = ro_H2 - *T_do * (Potok_H2[0] / Volume + ro_H2 * v_H2 / y - q1_H2);
+        if (ro3 <= 0)
+        {
+            printf("Problemsssss  ro H2 < 0! %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf\n", x, y, dx, dy, ro_H2, p_H2, u_H2, v_H2);
+            ro3 = 0.00001;
+        }
+        u3 = (ro_H2 * u_H2 - *T_do * (Potok_H2[1] / Volume + ro_H2 * v_H2 * u_H2 / y - q21_H2)) / ro3;
+        v3 = (ro_H2 * v_H2 - *T_do * (Potok_H2[2] / Volume + ro_H2 * v_H2 * v_H2 / y - q22_H2)) / ro3;
+        p3 = (((p_H2 / (ggg - 1) + ro_H2 * (u_H2 * u_H2 + v_H2 * v_H2) * 0.5) - *T_do * (Potok_H2[3] / Volume + //
+            +v_H2 * (ggg * p_H2 / (ggg - 1) + ro_H2 * (u_H2 * u_H2 + v_H2 * v_H2) * 0.5) / y - q3_H2)) - //
+            0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+        if (p3 <= 0)
+        {
+            p3 = 0.000001;
+        }
+
+        RO2_H2[index] = ro3;
+        P2_H2[index] = p3;
+        U2_H2[index] = u3;
+        V2_H2[index] = v3;
+    }
+    else
+    {
+        RO2_H2[index] = ro_H2;
+        P2_H2[index] = p_H2;
+        U2_H2[index] = u_H2;
+        V2_H2[index] = v_H2;
+    }
+
+    if (radius > 0.5)
+    {
+        ro3 = ro_H3 - *T_do * (Potok_H3[0] / Volume + ro_H3 * v_H3 / y - q1_H3);
+        if (ro3 <= 0.0)
+        {
+            printf("Problemsssss  ro H3 < 0! %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf\n", x, y, dx, dy, ro_H3, p_H3, u_H3, v_H3);
+            ro3 = 0.00001;
+        }
+        u3 = (ro_H3 * u_H3 - *T_do * (Potok_H3[1] / Volume + ro_H3 * v_H3 * u_H3 / y - q21_H3)) / ro3;
+        v3 = (ro_H3 * v_H3 - *T_do * (Potok_H3[2] / Volume + ro_H3 * v_H3 * v_H3 / y - q22_H3)) / ro3;
+        p3 = (((p_H3 / (ggg - 1) + ro_H3 * (u_H3 * u_H3 + v_H3 * v_H3) * 0.5) - *T_do * (Potok_H3[3] / Volume + //
+            +v_H3 * (ggg * p_H3 / (ggg - 1) + ro_H3 * (u_H3 * u_H3 + v_H3 * v_H3) * 0.5) / y - q3_H3)) - //
+            0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+        if (p3 <= 0)
+        {
+            p3 = 0.000001;
+        }
+
+        RO2_H3[index] = ro3;
+        P2_H3[index] = p3;
+        U2_H3[index] = u3;
+        V2_H3[index] = v3;
+
+    }
+    else
+    {
+        RO2_H3[index] = ro_H3;
+        P2_H3[index] = p_H3;
+        U2_H3[index] = u_H3;
+        V2_H3[index] = v_H3;
+    }
+
+
+    if   (radius > 0.5)
+    {
+        ro3 = ro_H4 - *T_do * (Potok_H4[0] / Volume + ro_H4 * v_H4 / y - q1_H4);
+        if (ro3 <= 0)
+        {
+            printf("Problemsssss  ro H4 < 0! %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf\n", x, y, dx, dy, ro_H4, p_H4, u_H4, v_H4, ro3);
+            ro3 = 0.000001;
+        }
+        u3 = (ro_H4 * u_H4 - *T_do * (Potok_H4[1] / Volume + ro_H4 * v_H4 * u_H4 / y - q21_H4)) / ro3;
+        v3 = (ro_H4 * v_H4 - *T_do * (Potok_H4[2] / Volume + ro_H4 * v_H4 * v_H4 / y - q22_H4)) / ro3;
+        p3 = (((p_H4 / (ggg - 1) + ro_H4 * (u_H4 * u_H4 + v_H4 * v_H4) * 0.5) - *T_do * (Potok_H4[3] / Volume + //
+            +v_H4 * (ggg * p_H4 / (ggg - 1) + ro_H4 * (u_H4 * u_H4 + v_H4 * v_H4) * 0.5) / y - q3_H4)) - //
+            0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+        if (p3 <= 0)
+        {
+            p3 = 0.0000001;
+        }
+
+        RO2_H4[index] = ro3;
+        P2_H4[index] = p3;
+        U2_H4[index] = u3;
+        V2_H4[index] = v3;
+    }
+    else
+    {
+        RO2_H4[index] = ro_H4;
+        P2_H4[index] = p_H4;
+        U2_H4[index] = u_H4;
+        V2_H4[index] = v_H4;
+    }
+
+    
 
     if (*T > tmin)
     {

@@ -15,6 +15,7 @@
 using namespace std;
 
 cudaError_t addWithCuda_Gas_Din(Konstruktor& K);
+cudaError_t addWithCuda_5_komponent(Konstruktor& K);
 __global__ void funk_time(double* T, double* T_do, double* TT, int* i);
 
 
@@ -49,12 +50,14 @@ int main()
     K.Drobim(0, 0, 0, 20);
 
 
-    K.print_cell();
+    K.initial_condition();   // Заполнение начальными условиями
+    K.Download_setka_multifluid("all_save_4_multifluid.txt");
+    //K.print_cell();
 
 
     // Add vectors in parallel.
 
-    cudaError_t cudaStatus = addWithCuda_Gas_Din(K);
+    cudaError_t cudaStatus = addWithCuda_5_komponent(K);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "addWithCuda failed!");
         return 1;
@@ -412,7 +415,7 @@ cudaError_t addWithCuda_Gas_Din(Konstruktor& K)
 
     cout << "Start programm" << endl;
     met = 1;
-    for (int i = 0; i < 100000; i = i + 2)  // Сколько шагов по времени делаем?
+    for (int i = 0; i < 1000000; i = i + 2)  // Сколько шагов по времени делаем?
     {
         if (i > 550000)
         {
@@ -558,17 +561,10 @@ cudaError_t addWithCuda_5_komponent(Konstruktor& K)
 {
     cudaError_t cudaStatus = cudaSuccess;
 
-
-
     int N = K.all_Kyb.size();          // Число ячеек
     cout << "All size = " << N << endl;
     int nn = K.get_size_conektiv();    // Число связей (размер массива связей)
     cout << "Connect = " << nn << endl;
-    //exit(-1);
-
-
-    K.initial_condition();   // Заполнение начальными условиями
-    //K.Download_setka("all_save_1.txt");
 
     int* host_sosed;
     int* dev_sosed;
@@ -995,17 +991,22 @@ cudaError_t addWithCuda_5_komponent(Konstruktor& K)
 
 
     cout << "Start programm" << endl;
-    met = 0;
-    for (int i = 0; i < 1000000; i = i + 2)  // Сколько шагов по времени делаем?
+    met = 1;
+    for (int i = 0; i < 250000; i = i + 2)  // Сколько шагов по времени делаем?
     {
         if (i > 550000)
         {
             met = 1;
         }
         // запускаем add() kernel на GPU, передавая параметры
-        Cuda_main_HLLDQ << <NNN, 256 >> > (dev_N, dev_x, dev_y, dev_size,//
+        Cuda_main_5_komponent << <NNN, 256 >> > (dev_N, dev_x, dev_y, dev_size,//
             dev_ro1, dev_ro2, dev_Q1, dev_Q2, dev_p1, dev_p2, dev_u1, dev_u2, dev_v1, dev_v2,//
+            dev_ro1_H1, dev_ro2_H1, dev_p1_H1, dev_p2_H1, dev_u1_H1, dev_u2_H1, dev_v1_H1, dev_v2_H1,//
+            dev_ro1_H2, dev_ro2_H2, dev_p1_H2, dev_p2_H2, dev_u1_H2, dev_u2_H2, dev_v1_H2, dev_v2_H2,//
+            dev_ro1_H3, dev_ro2_H3, dev_p1_H3, dev_p2_H3, dev_u1_H3, dev_u2_H3, dev_v1_H3, dev_v2_H3,//
+            dev_ro1_H4, dev_ro2_H4, dev_p1_H4, dev_p2_H4, dev_u1_H4, dev_u2_H4, dev_v1_H4, dev_v2_H4,//
             dev_sosed, dev_l, dev_r, dev_T, dev_T_do, i, K.DX, K.DY, met);
+
 
         cudaStatus = cudaDeviceSynchronize();
         if (cudaStatus != cudaSuccess) {
@@ -1020,8 +1021,12 @@ cudaError_t addWithCuda_5_komponent(Konstruktor& K)
             goto Error;
         }
 
-        Cuda_main_HLLDQ << <NNN, 256 >> > (dev_N, dev_x, dev_y, dev_size,//
+        Cuda_main_5_komponent << <NNN, 256 >> > (dev_N, dev_x, dev_y, dev_size,//
             dev_ro2, dev_ro1, dev_Q2, dev_Q1, dev_p2, dev_p1, dev_u2, dev_u1, dev_v2, dev_v1,//
+            dev_ro2_H1, dev_ro1_H1, dev_p2_H1, dev_p1_H1, dev_u2_H1, dev_u1_H1, dev_v2_H1, dev_v1_H1,//
+            dev_ro2_H2, dev_ro1_H2, dev_p2_H2, dev_p1_H2, dev_u2_H2, dev_u1_H2, dev_v2_H2, dev_v1_H2,//
+            dev_ro2_H3, dev_ro1_H3, dev_p2_H3, dev_p1_H3, dev_u2_H3, dev_u1_H3, dev_v2_H3, dev_v1_H3,//
+            dev_ro2_H4, dev_ro1_H4, dev_p2_H4, dev_p1_H4, dev_u2_H4, dev_u1_H4, dev_v2_H4, dev_v1_H4,//
             dev_sosed, dev_l, dev_r, dev_T, dev_T_do, i, K.DX, K.DY, met);
 
         cudaStatus = cudaDeviceSynchronize();
@@ -1037,42 +1042,6 @@ cudaError_t addWithCuda_5_komponent(Konstruktor& K)
             goto Error;
         }
 
-
-
-        if ((i % 15000000000 == 0 && i > 1))
-        {
-            cout << "HLL " << endl;
-            if (true)
-            {
-                cudaStatus = cudaMemcpy(host_ro1, dev_ro1, N * sizeof(double), cudaMemcpyDeviceToHost);
-                if (cudaStatus != cudaSuccess) {
-                    fprintf(stderr, "cudaMemcpy failed!  3452\n");
-                    goto Error;
-                }
-                cudaStatus = cudaMemcpy(host_p1, dev_p1, N * sizeof(double), cudaMemcpyDeviceToHost);
-                if (cudaStatus != cudaSuccess) {
-                    fprintf(stderr, "cudaMemcpy failed!  3452\n");
-                    goto Error;
-                }
-                cudaStatus = cudaMemcpy(host_u1, dev_u1, N * sizeof(double), cudaMemcpyDeviceToHost);
-                if (cudaStatus != cudaSuccess) {
-                    fprintf(stderr, "cudaMemcpy failed!  3452\n");
-                    goto Error;
-                }
-                cudaStatus = cudaMemcpy(host_v1, dev_v1, N * sizeof(double), cudaMemcpyDeviceToHost);
-                if (cudaStatus != cudaSuccess) {
-                    fprintf(stderr, "cudaMemcpy failed!  3452\n");
-                    goto Error;
-                }
-                cudaStatus = cudaMemcpy(host_Q1, dev_Q1, N * sizeof(double), cudaMemcpyDeviceToHost);
-                if (cudaStatus != cudaSuccess) {
-                    fprintf(stderr, "cudaMemcpy failed!  3452\n");
-                    goto Error;
-                }
-            }
-            K.read_Cuda_massiv(host_ro1, host_p1, host_u1, host_v1, host_Q1);
-            K.print_Tecplot();
-        }
     }
 
 
@@ -1104,11 +1073,29 @@ cudaError_t addWithCuda_5_komponent(Konstruktor& K)
             fprintf(stderr, "cudaMemcpy failed!  3452\n");
             goto Error;
         }
+
+        cudaStatus = cudaMemcpy(host_ro1_H1, dev_ro1_H1, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_p1_H1, dev_p1_H1, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_u1_H1, dev_u1_H1, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_v1_H1, dev_v1_H1, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_ro1_H2, dev_ro1_H2, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_p1_H2, dev_p1_H2, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_u1_H2, dev_u1_H2, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_v1_H2, dev_v1_H2, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_ro1_H3, dev_ro1_H3, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_p1_H3, dev_p1_H3, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_u1_H3, dev_u1_H3, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_v1_H3, dev_v1_H3, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_ro1_H4, dev_ro1_H4, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_p1_H4, dev_p1_H4, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_u1_H4, dev_u1_H4, N * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaStatus = cudaMemcpy(host_v1_H4, dev_v1_H4, N * sizeof(double), cudaMemcpyDeviceToHost);
     }
 
-    K.read_Cuda_massiv(host_ro1, host_p1, host_u1, host_v1, host_Q1);
-    K.print_Tecplot();
-    K.Save_setka("all_save_1.txt");
+    K.read_Cuda_massiv(host_ro1, host_p1, host_u1, host_v1, host_Q1, host_ro1_H1, host_p1_H1, host_u1_H1, host_v1_H1, //
+        host_ro1_H2, host_p1_H2, host_u1_H2, host_v1_H2, host_ro1_H3, host_p1_H3, host_u1_H3, host_v1_H3, host_ro1_H4, host_p1_H4, host_u1_H4, host_v1_H4);
+    K.print_Tecplot_multifluid();
+    K.Save_setka_multifluid("all_save_5_multifluid.txt");
 
 
 

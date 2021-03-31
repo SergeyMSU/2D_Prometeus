@@ -12,3 +12,11 @@ extern __device__ double HLLC_2d_Korolkov_b_s(const double& ro_L, const double& 
 extern __global__ void Cuda_main_HLLDQ(int* NN, double* X, double* Y, int* Size,//
     double* RO1, double* RO2, double* Q1, double* Q2, double* P1, double* P2, double* U1, double* U2, double* V1, double* V2,//
     int* SOSED, int* L, int* R, double* T, double* T_do, int step_, double DX, double DY, int metod = 0);
+
+__global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,//
+    double* RO1, double* RO2, double* Q1, double* Q2, double* P1, double* P2, double* U1, double* U2, double* V1, double* V2,//
+    double* RO1_H1, double* RO2_H1, double* P1_H1, double* P2_H1, double* U1_H1, double* U2_H1, double* V1_H1, double* V2_H1,//
+    double* RO1_H2, double* RO2_H2, double* P1_H2, double* P2_H2, double* U1_H2, double* U2_H2, double* V1_H2, double* V2_H2,//
+    double* RO1_H3, double* RO2_H3, double* P1_H3, double* P2_H3, double* U1_H3, double* U2_H3, double* V1_H3, double* V2_H3,//
+    double* RO1_H4, double* RO2_H4, double* P1_H4, double* P2_H4, double* U1_H4, double* U2_H4, double* V1_H4, double* V2_H4,//
+    int* SOSED, int* L, int* R, double* T, double* T_do, int step_, double DX, double DY, int metod);
