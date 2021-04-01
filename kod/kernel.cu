@@ -49,31 +49,36 @@ int main()
     K.Drobim(0, 0, 0, 40);
     K.Drobim(0, 0, 0, 20);
 
-
+    
     //K.print_konectiviti_short();
-    K.Download_setka_multifluid("all_save_13_multifluid.txt");
-    K.initial_condition();   // Заполнение начальными условиями
+    K.Download_setka_multifluid("all_save_14_multifluid.txt");
+    K.M_K_training();
+    K.M_K();
+    K.print_Tecplot();
+    //K.initial_condition();   // Заполнение начальными условиями
     //K.print_cell();
 
 
     // Add vectors in parallel.
+    if (false)
+    {
+        cudaError_t cudaStatus = addWithCuda_5_komponent(K);
+        if (cudaStatus != cudaSuccess) {
+            fprintf(stderr, "addWithCuda failed!");
+            return 1;
+        }
 
-    cudaError_t cudaStatus = addWithCuda_5_komponent(K);
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "addWithCuda failed!");
-        return 1;
-    }
 
 
 
-
-    // cudaDeviceReset must be called before exiting in order for profiling and
-    // tracing tools such as Nsight and Visual Profiler to show complete traces
-    // Эта штука должна быть вызвана
-    cudaStatus = cudaDeviceReset();
-    if (cudaStatus != cudaSuccess) {
-        fprintf(stderr, "cudaDeviceReset failed!\n");
-        return 1;
+        // cudaDeviceReset must be called before exiting in order for profiling and
+        // tracing tools such as Nsight and Visual Profiler to show complete traces
+        // Эта штука должна быть вызвана
+        cudaStatus = cudaDeviceReset();
+        if (cudaStatus != cudaSuccess) {
+            fprintf(stderr, "cudaDeviceReset failed!\n");
+            return 1;
+        }
     }
     
     return 0;

@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include "sensor.h"
+#include <mutex>
+#include "Cell.h"
 using namespace std;
 class Kyb;
 
@@ -30,9 +32,21 @@ public:
 	double p_H4;
 	double u_H4;
 	double v_H4;
+	double F_n;
+	double F_u;
+	double F_v;
+	double F_T;
+	double I_u;
+	double I_v;
+	double I_T;
 	vector <Kyb*> sosed;
+	vector <Kyb*> boandary_1; // Соседи справа
+	vector <Kyb*> boandary_2; // Соседи справа
+	vector <Kyb*> boandary_3; // Соседи справа
+	vector <Kyb*> boandary_4; // Соседи справа
 	int number;
 	int size;                // Показывает на каком этапе мельчения находится эта ячейка, это позволит определить точно её размер (без потери точности)
+	mutex mut;
 
 	static int move_number;
 	bool drob;               // Удобная булевская переменная для использования в разных функциях 
@@ -49,6 +63,9 @@ public:
 
 	bool Belong_fast(const double& xx, const double& yy, const double& dx, const double& dy);
 	// Быстрый аналог предыдущей функции, но нужно подавать размеры ячейки в неё
+
+	void Setup_boandary(const double& DX, const double& DY);
+	// Расфвсовать соседей по границам - с какой они стараны
 
 private:
 	void initialization(double, double, int);

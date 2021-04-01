@@ -911,7 +911,7 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
     {
         k3 = 0;
         k4 = 0;
-        if ( ((kv(u) + kv(v)) / (ggg * p / ro) > 1.3) || ((radius <= 50.0)))
+        if ( ((kv(u) + kv(v)) / (ggg * p / ro) > 1.0) || ((radius <= 50.0)))
         {
             k1 = 1;
             k2 = 0;

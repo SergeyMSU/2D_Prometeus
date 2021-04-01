@@ -17,49 +17,6 @@ Konstruktor::Konstruktor(int a, int b,  double xmin, double xmax, double ymax)
 	this->initialization(a, b, xmin, xmax, ymax);
 	this->New_design();                      // Создаёт начальную сетку (без связей)
 	this->konectiviti();                     // Связывает начальные ячейки с их соседями
-
-
-	// Блок загрузки датчиков случайных чисел
-	ifstream fin2;
-	fin2.open("rnd_Dima.dat");
-	double d, a, b, c;
-	for (int i = 0; i < 270; i++)
-	{
-		fin2 >> d >> a >> b >> c;
-		auto s = new Sensor(a, b, c);
-		this->Sensors.push_back(s);
-	}
-	fin2.close();
-
-	this->sqv_1 = (2.54189 * pi * (kv(this->y_max) - kv(350.0)));
-	this->sqv_2 = (y_max * sqrtpi * (this->x_max - this->x_min));
-	this->sqv_3 = (0.0000282543 * pi * kv(this->y_max));
-	this->sqv_4 = (2.54189 * pi * kv(350.0));
-	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 28341900;
-	this->Number2 = (6478380);
-	this->Number3 = (162000);
-	this->Number4 = (1 * 20250000);
-	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
-
-	for (auto& i : this->all_Kyb)
-	{
-		for (auto& j : i->sosed)
-		{
-			if (j->number == -1)
-			{
-				this->Boandary_1.push_back(i);
-			}
-			if (j->number == -2)
-			{
-				this->Boandary_2.push_back(i);
-			}
-			if (j->number == -3)
-			{
-				this->Boandary_3.push_back(i);
-			}
-		}
-	}
 }
 
 Konstruktor::~Konstruktor()
@@ -260,7 +217,7 @@ void Konstruktor::print_Tecplot(void)
 	ofstream fout;
 	string name_f = "2D_tecplot.txt";
 	fout.open(name_f);
-	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Y\", \"r\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\", ZONE T = \"HP\"" << endl;
+	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Y\", \"r\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\",\"F_n\",\"F_u\",\"F_v\",\"F_T\", ZONE T = \"HP\"" << endl;
 	for (auto& i : this->all_Kyb)
 	{
 			double Max = 0.0;
@@ -273,7 +230,8 @@ void Konstruktor::print_Tecplot(void)
 
 			fout << i->x * r_o << " " << i->y * r_o << " " << sqrt(i->x * r_o * i->x * r_o + i->y * r_o * i->y * r_o) << //
 				" " << i->ro * ro_o << " " << i->p * p_o << " " //
-				<< i->u * u_o << " " << i->v * u_o << " " << Max << " "  << QQ << endl;
+				<< i->u * u_o << " " << i->v * u_o << " " << Max << " "  << QQ << " " << i->F_n * ro_o << " " << //
+				i->F_u * u_o << " " << i->F_v * u_o << " " << i->F_T << " " << endl;
 		
 	}
 	for (auto& i : res)
@@ -288,8 +246,30 @@ void Konstruktor::print_Tecplot(void)
 
 		fout << i->x * r_o << " " << i->y * r_o << " " << sqrt(i->x * r_o * i->x * r_o + i->y * r_o * i->y * r_o) << //
 			" " << i->ro * ro_o << " " << i->p * p_o << " " //
-			<< i->u * u_o << " " << i->v * u_o << " " << Max << " " << QQ << endl;
+			<< i->u * u_o << " " << i->v * u_o << " " << Max << " " << QQ << " " << i->F_n * ro_o << " " << //
+			i->F_u * u_o << " " << i->F_v * u_o << " " << i->F_T << " " << endl;
 
+	}
+	fout.close();
+
+	name_f = "1D_tecplot_multifluid.txt";
+	fout.open(name_f);
+	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\",\"F_n\",\"F_u\",\"F_v\",\"F_T\", ZONE T = \"HP\"" << endl;
+
+	for (auto& i : res)
+	{
+		double Max = 0.0;
+		double QQ = 0.0;
+		if (i->ro > 0.000000000001)
+		{
+			QQ = i->Q / i->ro;
+			Max = sqrt(kvv(i->u, i->v, 0.0) / (ggg * i->p / i->ro));
+		}
+
+		fout << i->x * r_o << //
+			" " << i->ro * ro_o << " " << i->p * p_o << " " //
+			<< i->u * u_o << " " << i->v * u_o << " " << Max << " " << QQ << " " << i->F_n * ro_o << " " << //
+			i->F_u * u_o << " " << i->F_v * u_o << " " << i->F_T << " " << endl;
 	}
 	fout.close();
 }
@@ -1213,9 +1193,57 @@ void Konstruktor::Change_Velosity(Sensor* s, const double& Ur, const double& Uth
 	Z = v3;
 }
 
+void Konstruktor::M_K_training(void)
+{
+	// Блок загрузки датчиков случайных чисел
+	ifstream fin2;
+	fin2.open("rnd_Dima.dat");
+	double d, a1, b1, c;
+	for (int i = 0; i < 270; i++)
+	{
+		fin2 >> d >> a1 >> b1 >> c;
+		auto s = new Sensor(a1, b1, c);
+		this->Sensors.push_back(s);
+	}
+	fin2.close();
+
+
+	this->sqv_1 = (2.54189 * pi * (kv(this->y_max) - kv(350.0)));
+	this->sqv_2 = (y_max * sqrtpi * (this->x_max - this->x_min));
+	this->sqv_3 = (0.0000282543 * pi * kv(this->y_max));
+	this->sqv_4 = (2.54189 * pi * kv(350.0));
+	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
+	this->Number1 = 2834190 * 5;
+	this->Number2 = (647838 * 5);
+	this->Number3 = (16200 * 5);
+	this->Number4 = (2025000 * 15);
+	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
+
+	for (auto& i : this->all_Kyb)
+	{
+		for (auto& j : i->sosed)
+		{
+			if (j->number == -1)
+			{
+				this->Boandary_1.push_back(i);
+			}
+			if (j->number == -2)
+			{
+				this->Boandary_2.push_back(i);
+			}
+			if (j->number == -3)
+			{
+				this->Boandary_3.push_back(i);
+			}
+		}
+
+		i->Setup_boandary(this->DX, this->DY);
+	}
+}
+
 void Konstruktor::M_K(void)
 {
-
+	mutex mut_1;
 #pragma omp parallel for
 	for (int index = 0; index < 270; index++)
 	{
@@ -1234,9 +1262,9 @@ void Konstruktor::M_K(void)
 		mu3 = ((this->sqv_3) / this->sum_s) * (1.0 * this->AllNumber / this->Number3);
 		mu4 = ((this->sqv_4) / this->sum_s) * (1.0 * this->AllNumber / this->Number4);
 		Sensor* sens = Sensors[index];
-		/*mut_1.lock();
+		mut_1.lock();
 		cout << index << " potok  is  270" << endl;
-		mut_1.unlock();*/
+		mut_1.unlock();
 
 		for (int ii = 0; ii < Number1 / 270; ii++)  //
 		{
@@ -1258,17 +1286,12 @@ void Konstruktor::M_K(void)
 			Kyb* Point = Belong_point(1, this->x_max - geo, r_0);  // Находит ячейку, которой принадлежит точка
 			// РАБОТАЕТ ТОЛЬКО ЕСЛИ РАЗМЕРЫ ГРАНИЧНЫХ ЯЧЕЕК - ИЗНАЧАЛЬНЫЕ DX DY (иначе нужно поменять функцию)
 
-			Fly_exchenge(sens, x_max + dx / 2.0 - geo, y_0, z_0,//
-				a, b, c, //
-				m * N + n, s, u, mu1, nn1, nn2, nn3, np1, np2, np3, mut);
-			//Flying_exchange2(sens, a, b, c, x_max + dx / 2.0 - geo, y_0, z_0,//
-			//    m * N + n, -1, mu1, s, u, nn1, nn2, nn3, np1, np2, np3, mut, false, mu1);
+
+			Fly_exchenge(sens, x_max - geo, y_0, z_0, a, b, c, Point, mu1);
 		}
 		for (int ii = 0; ii < Number2 / 270; ii++)  // С боковой поверхности
 		{
 			t = false;
-			//double a, b, c;
-			//Velosity_initial(sens, a, b, c);
 			ksi1 = sens->MakeRandom();
 			ksi2 = sens->MakeRandom();
 			ksi3 = sens->MakeRandom();
@@ -1277,7 +1300,7 @@ void Konstruktor::M_K(void)
 			ksi6 = sens->MakeRandom();
 			ksi7 = sens->MakeRandom();
 
-			x_0 = (x_min - dx / 2.0 + geo) + ksi1 * (x_max + dx - 2.0 * geo - x_min);
+			x_0 = (x_min + geo) + ksi1 * (x_max - 2.0 * geo - x_min);
 			phi = ksi2 * 2.0 * pi;
 			Vphi = cos(2.0 * pi * ksi3) * sqrt(-log(1.0 - ksi4));
 			Vx = Velosity_inf + sin(2.0 * pi * ksi5) * sqrt(-log(1.0 - ksi6));
@@ -1286,13 +1309,9 @@ void Konstruktor::M_K(void)
 			z_0 = (y_max - geo) * sin(phi);
 
 
-			Belong_point(x_0, y_max - geo, n, m);  // Находит ячейку, которой принадлежит точка
+			Kyb* Point = Belong_point(3, x_0, y_max - geo);
 
-			Fly_exchenge(sens, x_0, y_0, z_0, Vx, cos(phi) * Vr - sin(phi) * Vphi,//
-				sin(phi) * Vr + cos(phi) * Vphi, m * N + n, s, u, mu2, nn1, nn2, nn3, np1, np2, np3, mut);
-
-			//Flying_exchange2(sens, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi, x_0, y_0, z_0,//
-			//    m * N + n, -1, mu2, s, u, nn1, nn2, nn3, np1, np2, np3, mut, false, mu2);
+			Fly_exchenge(sens, x_0, y_0, z_0, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi, Point, mu2);
 		}
 		for (int ii = 0; ii < Number3 / 270; ii++)
 		{
@@ -1311,13 +1330,9 @@ void Konstruktor::M_K(void)
 
 
 
-			Belong_point(x_min - dx / 2.0 + geo, r_0, n, m);  // Находит ячейку, которой принадлежит точка
+			Kyb* Point = Belong_point(2, x_min + geo, r_0);
 
-			Fly_exchenge(sens, x_min - dx / 2.0 + geo, y_0, z_0,//
-				a, b, c, //
-				m * N + n, s, u, mu3, nn1, nn2, nn3, np1, np2, np3, mut);
-			//Flying_exchange2(sens, a, b, c, x_min - dx / 2.0 + geo, y_0, z_0,//
-			//    m * N + n, -1, mu3, s, u, nn1, nn2, nn3, np1, np2, np3, mut, false, mu3);
+			Fly_exchenge(sens, x_min + geo, y_0, z_0, a, b, c, Point, mu1);
 		}
 		for (int ii = 0; ii < Number4 / 270; ii++)
 		{
@@ -1328,7 +1343,7 @@ void Konstruktor::M_K(void)
 			ksi1 = sens->MakeRandom();
 			ksi2 = sens->MakeRandom();
 
-			r_0 = sqrt(ksi1 * 1.0 * 1.0);
+			r_0 = sqrt(ksi1 * kv(350.0));
 			phi = ksi2 * 2.0 * pi;
 			y_0 = r_0 * cos(phi);
 			z_0 = r_0 * sin(phi);
@@ -1336,41 +1351,31 @@ void Konstruktor::M_K(void)
 			//cout << a << endl;
 
 
-			Belong_point(x_max + dx / 2.0 - geo, r_0, n, m);  // Находит ячейку, которой принадлежит точка
+			Kyb* Point = Belong_point(1, x_max - geo, r_0);
 
-			Fly_exchenge(sens, x_max + dx / 2.0 - geo, y_0, z_0,//
-				a, b, c, //
-				m * N + n, s, u, mu4, nn1, nn2, nn3, np1, np2, np3, mut);
-
-			//Flying_exchange2(sens, a, b, c, x_max + dx / 2.0 - geo, y_0, z_0,//
-			//    m* N + n, -1, mu4, s, u, nn1, nn2, nn3, np1, np2, np3, mut, false, mu4);
+			Fly_exchenge(sens, x_max - geo, y_0, z_0, a, b, c, Point, mu1);
 		}
 	}
 
-	for (int k = 0; k < K; k++)
+	for (auto& k: this->all_Kyb)
 	{
-		int n = k % N;                                   // номер ячейки по x (от 0)
-		int m = (k - n) / N;                             // номер ячейки по y (от 0)
-		double y = y_min + m * (y_max) / (M);
-		double x = x_min + n * (x_max - x_min) / (N - 1);
-		double no = (1.0 * AllNumber * (pi * kv(y + dy / 2.0) * dx - pi * kv(y - dy / 2.0) * dx));
+		double dx = (DX / pow(2, k->size - 1)) / 2.0;   // Половина длины ячейки
+		double dy = (DY / pow(2, k->size - 1)) / 2.0;   // Половина ширины ячейки
 
-		np2[k].x = np2[k].x / nn1[k];
-		np2[k].y = np2[k].y / nn1[k];
-		np2[k].z = np2[k].z / nn1[k];
-		np3[k] = np3[k] / nn1[k];
+		double no = (1.0 * AllNumber * (pi * kv(k->y + dy) * dx - pi * kv(k->y - dy) * dx));
 
-		nn1[k] = sum_s * nn1[k] / no;
-		nn2[k].x = sum_s * nn2[k].x / no;
-		nn2[k].y = sum_s * nn2[k].y / no;
-		nn2[k].z = sum_s * nn2[k].z / no;
-		nn3[k] = sum_s * nn3[k] / no;
+		k->I_u = k->I_u / k->F_n;
+		k->I_v = k->I_v / k->F_n;
+		k->I_T = k->I_T / k->F_n;
 
-		np1[k] = sum_s * np1[k] / no;
-		np2[k].x = -s[k].x * np2[k].x;
-		np2[k].y = -s[k].x * np2[k].y;
-		np2[k].z = -s[k].x * np2[k].z;
-		np3[k] = -(s[k].x / 2.0) * np3[k];
+		k->F_n = sum_s * k->F_n / no;
+		k->F_u = sum_s * k->F_u / no;
+		k->F_v = sum_s * k->F_v / no;
+		k->F_T = sum_s * k->F_T / no;
+
+		k->I_u = -k->I_u;
+		k->I_v = -k->I_v;
+		k->I_T = -(1.0 / 2.0) * k->I_T;
 	}
 }
 
@@ -1390,6 +1395,8 @@ void Konstruktor::Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0,
 
 	do
 	{
+		//cout << X << " " << sqrt(kv(Y) + kv(Z)) << " " << 0 << endl;
+		//cout << head->x << " " << head->y << " " << 1 << endl;
 		if (Flying_exchange(KSI, Vx, Vy, Vz, X, Y, Z, next, head, prev, mu, I_do) == false)
 		{
 			break;
@@ -1400,11 +1407,11 @@ void Konstruktor::Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0,
 			KSI = -log(1.0 - sens->MakeRandom());
 			I_do = 0.0;
 			prev = head;
-			double sk = sqrt(s[head].y / s[head].x);
+			double sk = sqrt(head->p / head->ro);
 			double alpha = this->polar_angle(Y, Z);
 			double uuu, vvv;
-			uuu = u[head].x;
-			vvv = u[head].y;
+			uuu = head->u;
+			vvv = head->v;
 
 			this->Change_Velosity(sens, uuu / sk, vvv * cos(alpha) / sk, vvv * sin(alpha) / sk,//
 				Vx / sk, Vy / sk, Vz / sk, uu, vv, ww, sk);  // здесь подаются  r, theta, phi
@@ -1426,7 +1433,6 @@ void Konstruktor::Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0,
 			head = next;
 		}
 	} while (true);
-
 	return;
 }
 
@@ -1434,28 +1440,32 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 	double& Z, Kyb*& next, Kyb* head, Kyb* prev, const double& mu, double& I_do)
 	// Vx, Vy, Vz - скорость атома водорода
 	// X,Y,Z - координата атома
-	// head - номер текущей ячейки
+	// head - текущая ячейки
 {
-	int n = head % N;                                   // номер ячейки по x (от 0)
-	int m = (head - n) / N;                             // номер ячейки по y (от 0)
-
-	double y0 = y_min + m * dy;
-	double x0 = x_min + n * dx;
+	double dx = (this->DX / pow(2, head->size - 1)) / 2.0;   // Половина длины ячейки
+	double dy = (this->DY / pow(2, head->size - 1)) / 2.0;   // Половина ширины ячейки
+	double y0 = head->y;
+	double x0 = head->x;
 	double x, uz, uz_M, uz_E, t1, t2;// y, z, r;
 	int mode = 0;
 	double time = 1000000000;
 	int step = 0;
-	double cp = sqrt(p / ro);
+	double cp = sqrt(head->p / head->ro);
 	bool chenge_was = false;
 	double u1, u2, u3;
 	double al, be;
+	double vx = head->u;
+	double vy = head->v;
+	double ro = head->ro;
 
-	while (Peresechenie(x0, y0, X, Y, Z, Vx, Vy, Vz, mode, time) == false)
+	while (Peresechenie(x0, y0, dx, dy, X, Y, Z, Vx, Vy, Vz, mode, time) == false)
 	{
 		step++;
 		if (step > 6)
 		{
-			cout << "Error  1605" << endl;
+			//cout << "Error  1605323534526853234245436" << endl;
+			//cout << "EROR:  " << x0 << " " << y0 << endl;
+			exit(-1);
 			return false;
 		}
 		double alpha = polar_angle(Y, Z);
@@ -1463,27 +1473,23 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 		yy = y0 * cos(alpha);
 		zz = y0 * sin(alpha);
 		double nn = sqrt(kv(X - x0) + kv(Y - yy) + kv(Z - zz));
-		X = X - geo * (X - x0) / nn;
-		Y = Y - geo * (Y - yy) / nn;
-		Z = Z - geo * (Z - zz) / nn;
+		double geot = dx / 500.0;
+		X = X - geot * (X - x0) / nn;
+		Y = Y - geot * (Y - yy) / nn;
+		Z = Z - geot * (Z - zz) / nn;
 	}
 
+	//cout << mode << endl;
 
 	double l = sqrt(kvv(time * Vx, time * Vy, time * Vz));
 	//double alpha = polar_angle(Y + 0.5 * time * Vy, Z + 0.5 * time * Vz);
 	double alpha = polar_angle(Y, Z);
-	/*if (n == 410 && m == 1)
-	{
-		mut.lock();
-		cout << Vx << " " << (Vy * cos(alpha) + Vz * sin(alpha)) << endl;
-		mut.unlock();
-	}*/
 	double u = sqrt(kvv(Vx - vx, Vy - vy * cos(alpha), Vz - vy * sin(alpha)));
 	uz = Velosity_1(u, cp);
-	double sig = Kn * sqrt(kvv(Vx, Vy, Vz)) / (ro * uz * sigma(uz));
+	double sig = Kn_ * sqrt(kvv(Vx, Vy, Vz)) / (ro * uz * sigma(uz));
 	double I = I_do + l / sig;
 
-	if (I < KSI || ChEx == false)  // Не произошла перезарядка
+	if (I < KSI)  // Не произошла перезарядка
 	{
 		I_do = I;
 		alpha = polar_angle(Y + 0.5 * time * Vy, Z + 0.5 * time * Vz);
@@ -1509,22 +1515,19 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 	u3 = vy * sin(alpha) - Vz;
 	double skalar = Vx * u1 + Vy * u2 + Vz * u3;
 
-	mut.lock();
-	nn1[head] += time * mu;
-	nn2[head].x += time * Vx * mu;
-	nn2[head].y += time * (Vy * cos(alpha) + Vz * sin(alpha)) * mu;
-	nn2[head].z += time * (-Vy * sin(alpha) + Vz * cos(alpha)) * mu;
-	nn3[head] += time * kvv(Vx, Vy, Vz) * mu;
 
-	//np2[head].x += mu * time * uz_M * u * sigma(uz_M) * cos(al) * cos(be);
-	np2[head].x += mu * time * uz_M * uz * sigma(uz_M) * u1 / u;
-	np2[head].y += mu * time * uz_M * uz * sigma(uz_M) * (u2 * cos(alpha) + u3 * sin(alpha)) / u;
-	np2[head].z += mu * time * uz_M * uz * sigma(uz_M) * (-u2 * sin(alpha) + u3 * cos(alpha)) / u;
+	head->mut.lock();
+	head->F_n += time * mu;
+	head->F_u += time * Vx * mu;
+	head->F_v += time * (Vy * cos(alpha) + Vz * sin(alpha)) * mu;
+	head->F_T += time * kvv(Vx, Vy, Vz) * mu;
 
-	/*np2[head].y += mu * time * uz_M * u * sigma(uz_M) * sin(al) * cos(be);  // Это в декартовых, а надо в цилиндрических
-	np2[head].z += mu * time * uz_M * u * sigma(uz_M) * sin(be);*/
-	np3[head] += mu * time * (0.5 * (3.0 * kv(cp) + 2.0 * kv(u)) * uz_E * sigma(uz_E) + 2.0 * uz_M * uz * sigma(uz_M) * skalar / u);
-	mut.unlock();
+
+	head->I_u += mu * time * uz_M * uz * sigma(uz_M) * u1 / u;
+	head->I_v += mu * time * uz_M * uz * sigma(uz_M) * (u2 * cos(alpha) + u3 * sin(alpha)) / u;
+
+	head->I_T += mu * time * (0.5 * (3.0 * kv(cp) + 2.0 * kv(u)) * uz_E * sigma(uz_E) + 2.0 * uz_M * uz * sigma(uz_M) * skalar / u);
+	head->mut.unlock();
 
 
 	// Передвигаем координату
@@ -1538,54 +1541,115 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 	{
 		if (mode == 1)
 		{
-			next = m * N + n + 1;
-			if (n + 1 >= N)
+			if (head->boandary_1.size() == 1)
 			{
-				return false;
+				if (head->boandary_1[0]->number < 0)
+				{
+					return false;
+				}
+				else
+				{
+					next = head->boandary_1[0];
+					return true;
+				}
 			}
 			else
 			{
-				return true;
+				for (auto& i : head->boandary_1)
+				{
+					if (i->Belong_slow(X + geo, sqrt(kv(Y) + kv(Z)), this->DX, this->DY))
+					{
+						next = i;
+						return true;
+					}
+				}
+				cout << "Ne nashol soseda   123143254rf3dwedwwefw" << endl;
+				return false;
 			}
 		}
 		if (mode == 2)
 		{
-			next = m * N + n - 1;
-
-			if (n - 1 < 0)
+			//cout << "Size = " << head->boandary_2.size() << endl;
+			if (head->boandary_2.size() == 1)
 			{
-				return false;
+				if (head->boandary_2[0]->number < 0)
+				{
+					return false;
+				}
+				else
+				{
+					next = head->boandary_2[0];
+					return true;
+				}
 			}
 			else
 			{
-				return true;
+				for (auto& i : head->boandary_2)
+				{
+					if (i->Belong_slow(X - geo, sqrt(kv(Y) + kv(Z)), this->DX, this->DY))
+					{
+						next = i;
+						return true;
+					}
+				}
+				cout << "Ne nashol soseda   wceferver34r3x4rc343r4" << endl;
+				return false;
 			}
 		}
 		if (mode == 3)
 		{
-			next = (m + 1) * N + n;
-
-			if (m + 1 >= M)
+			if (head->boandary_3.size() == 1)
 			{
-				return false;
+				if (head->boandary_3[0]->number < 0)
+				{
+					return false;
+				}
+				else
+				{
+					next = head->boandary_3[0];
+					return true;
+				}
 			}
 			else
 			{
-				return true;
+				for (auto& i : head->boandary_3)
+				{
+					if (i->Belong_slow(X, sqrt(kv(Y) + kv(Z)) + geo, this->DX, this->DY))
+					{
+						next = i;
+						return true;
+					}
+				}
+				cout << "Ne nashol soseda   ukuijhgfer435353" << endl;
+				return false;
 			}
 		}
 		if (mode == 4)
 		{
-			next = (m - 1) * N + n;
-			if (m - 1 < 0)
+			if (head->boandary_4.size() == 1)
 			{
-				cout << "Ne dolgen suda popadat  erfgefrgert345345sefwe" << endl;
-				exit(-1);
-				return false;
+				if (head->boandary_4[0]->number < 0)
+				{
+					return false;
+				}
+				else
+				{
+					next = head->boandary_4[0];
+					return true;
+				}
 			}
 			else
 			{
-				return true;
+				for (auto& i : head->boandary_4)
+				{
+					if (i->Belong_slow(X, sqrt(kv(Y) + kv(Z)) - geo, this->DX, this->DY))
+					{
+						next = i;
+						return true;
+					}
+				}
+				cout << "Ne nashol soseda   wfcrfewv232345y6786v5vt5" << endl;
+				return false;
 			}
 		}
 	}
@@ -1594,7 +1658,6 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 		return true;
 	}
 	return false;
-
 }
 
 bool Konstruktor::Peresechenie(const double& x0, const double& y0, const double& dx, const double& dy, const double& x, const double& y, const double& z, //
@@ -1604,13 +1667,13 @@ bool Konstruktor::Peresechenie(const double& x0, const double& y0, const double&
 	double t1 = -1.0, t2 = -1.0, t3 = -1.0, t4 = -1.0, t5 = -1.0, t6 = -1.0;
 	if (fabs(Vx) > 0.0000001)
 	{
-		t1 = (x0 + dx / 2.0 - x) / Vx;
-		t2 = (x0 - dx / 2.0 - x) / Vx;
+		t1 = (x0 + dx - x) / Vx;
+		t2 = (x0 - dx - x) / Vx;
 	}
 	if (kv(Vy) + kv(Vz) > 0.0000001)
 	{
-		this->peresich(y, z, Vy, Vz, y0 + dy / 2.0, t3, t4);
-		this->peresich(y, z, Vy, Vz, y0 - dy / 2.0, t5, t6);
+		this->peresich(y, z, Vy, Vz, y0 + dy, t3, t4);
+		this->peresich(y, z, Vy, Vz, y0 - dy, t5, t6);
 		t3 = minplus(t3, t4);
 		t4 = minplus(t5, t6);
 	}
@@ -1749,4 +1812,42 @@ double Konstruktor::polar_angle(const double& x, const double& y)
 		return  3.0 * PI / 2.0;
 	}
 	return 0.0;
+}
+
+double Konstruktor::Velosity_1(const double& u, const double& cp)
+{
+	if (u < 0.001)
+	{
+		return 2.0 * cp / sqrtpi + 2.0 * u * u / (3.0 * cp * sqrtpi) - u * u * u * u / (15.0 * cp * cp * cp * sqrtpi);
+	}
+	else
+	{
+		return  exp(-u * u / kv(cp)) * cp / sqrtpi + (u + kv(cp) / (2.0 * u)) * erf(u / cp);
+	}
+}
+
+double Konstruktor::Velosity_2(const double& u, const double& cp)  // Считает на совсем скорость, а только её числитель (см. статью)
+{
+	if (u < 0.001)
+	{
+		return (8.0 / 3.0) * kv(cp) * kv(cp) * pi * u + (8.0 / 15.0) * kv(cp) * pi * u * u * u - (4.0 / 105.0) * pi * kv(u) * kv(u) * u;
+	}
+	else
+	{
+		return  cp * cp * cp * pi * (exp(-u * u / kv(cp)) * cp * u * 2.0 * (kv(cp) + 2.0 * kv(u)) +//
+			sqrtpi * (4.0 * kv(u) * kv(u) + 4.0 * cp * cp * kv(u) - kv(cp) * kv(cp)) * erf(u / cp)) / (4.0 * u * u);
+	}
+}
+
+double Konstruktor::Velosity_3(const double& u, const double& cp)
+{
+	if (u < 0.001)
+	{
+		return 8.0 * cp / (3.0 * sqrtpi) + 8.0 * u * u / (9.0 * cp * sqrtpi) - 44.0 * u * u * u * u / (135.0 * cp * cp * cp * sqrtpi);
+	}
+	else
+	{
+		return  exp(-u * u / kv(cp)) * cp * (5.0 * kv(cp) + 2.0 * kv(u)) / (sqrtpi * (3.0 * kv(cp) + 2.0 * kv(u))) +//
+			(4.0 * kv(u) * kv(u) + 12.0 * cp * cp * kv(u) + 3.0 * kv(cp) * kv(cp)) * erf(u / cp) / (2.0 * u * (3.0 * kv(cp) + 2.0 * kv(u)));
+	}
 }

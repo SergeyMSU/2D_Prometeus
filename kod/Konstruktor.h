@@ -87,6 +87,11 @@ public:
 
 
 	// Монте-Карло
+	void M_K_training(void); // Подготовка к Монте-Карло
+	// Функция должны быть обязательно запущена, если вы собираетесь использовать Монте-Карло в программе.
+	// Запуск только один раз, но после дробления!!!
+
+
 	void Velosity_initial(Sensor* s, double& Vx, double& Vy, double& Vz);
 	void Velosity_initial2(Sensor* s, double& Vx, double& Vy, double& Vz);
 	void Change_Velosity(Sensor* s, const double& Ur, const double& Uthe, const double& Uphi, //
@@ -100,7 +105,7 @@ public:
 
 
 
-	Kyb* Konstruktor::Belong_point(int b, const double& x, const double& y);  // Ищет какой граничной ячейке принадлежит точка
+	Kyb* Belong_point(int b, const double& x, const double& y);  // Ищет какой граничной ячейке принадлежит точка
 	// b - это номер границы   Boandary_b
 
 
@@ -125,5 +130,9 @@ private:
 
 	double minplus(const double& x, const double& y);
 	double polar_angle(const double& x, const double& y);
+
+	double Velosity_1(const double& u, const double& cp);
+	double Velosity_2(const double& u, const double& cp);
+	double Velosity_3(const double& u, const double& cp);
 };
 
