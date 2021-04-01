@@ -805,21 +805,21 @@ void Konstruktor::initial_condition()
 		double dist = sqrt(i->x * i->x + i->y * i->y);
 		double r_0 = 1.0;
 		double ro = (389.988 * 389.988) / (chi_ * chi_);
-		double P_E = ro * chi_ * chi_ / (ggg * 0.25 * 0.25);
+		double P_E = ro * chi_ * chi_ / (ggg * 5.0 * 5.0);
 		if (dist <= 1.0)
 		{
-			i->ro = ro;
-			i->p = P_E;
+			i->ro = ro / (dist * dist);
+			i->p = P_E * pow(r_0 / dist, 2.0 * ggg);
 			i->u = chi_ * i->x / dist;
 			i->v = chi_ * i->y / dist;
-			i->Q = ro * r_0 * r_0;
+			i->Q = ro * r_0 * r_0 / (dist * dist);
 
-			i->ro_H1 = ((sigma(chi_) * 389.988) / (2.0 * Kn_ * chi_)) * (1.0 - 0.1 /1.0);
-			i->p_H1 = 0.000001;
+			i->ro_H1 = 0.0000001;
+			i->p_H1 = 0.000000001;
 			i->u_H1 = chi_ * i->x / dist;
 			i->v_H1 = chi_ * i->y / dist;
 
-			i->ro_H2 = 0.000001;
+			/*i->ro_H2 = 0.000001;
 			i->p_H2 = 0.00000001;
 			i->u_H2 = 0.0;
 			i->v_H2 = 0.0;
@@ -830,9 +830,9 @@ void Konstruktor::initial_condition()
 			i->ro_H4 = 0.000001;
 			i->p_H4 = 0.00000001;
 			i->u_H4 = 0.0;
-			i->v_H4 = 0.0;
+			i->v_H4 = 0.0;*/
 		}
-		else if (dist <= 1.2 * Distant)
+		else if (dist <= Distant)
 		{
 			i->ro = ro / (dist * dist);
 			i->p = P_E * pow(r_0 / dist, 2.0 * ggg);
@@ -840,12 +840,8 @@ void Konstruktor::initial_condition()
 			i->v = chi_ * i->y / dist;
 			i->Q = ro * r_0 * r_0 / (dist * dist);
 
-			i->ro_H1 = ((sigma(chi_) * 389.988) / (2.0 * Kn_ * chi_))* (1.0 / dist - 0.1 / kv(dist));
-			if (i->ro_H1 <= 0.0)
-			{
-				i->ro_H1 = 0.000001;
-			}
-			i->p_H1 = 0.000001;
+			i->ro_H1 = 0.0000001; // 0.0012 / 0.18; //(2.0 * (sigma(chi_) * 389.988) / (2.0 * Kn_ * chi_))* (1.0 / dist - 0.1 / kv(dist));
+			i->p_H1 = 0.000000001;
 			i->u_H1 = chi_ * i->x / dist;
 			i->v_H1 = chi_ * i->y / dist;
 		}

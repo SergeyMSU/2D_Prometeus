@@ -911,7 +911,7 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
     {
         k3 = 0;
         k4 = 0;
-        if ( ((kv(u) + kv(v)) / (ggg * p / ro) > 1.3) || ((radius <= Distant)))
+        if ( ((kv(u) + kv(v)) / (ggg * p / ro) > 1.3) || ((radius <= 50.0)))
         {
             k1 = 1;
             k2 = 0;
@@ -1002,7 +1002,7 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
         V2_H1[index] = v_H1;
     }
 
-    if (radius > 0.5)
+    if (true)//(radius > 0.5)
     {
         ro3 = ro_H2 - *T_do * (Potok_H2[0] / Volume + ro_H2 * v_H2 / y - q1_H2);
         if (ro3 <= 0)
@@ -1033,7 +1033,7 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
         V2_H2[index] = v_H2;
     }
 
-    if (radius > 0.5)
+    if (true)//(radius > 0.5)
     {
         ro3 = ro_H3 - *T_do * (Potok_H3[0] / Volume + ro_H3 * v_H3 / y - q1_H3);
         if (ro3 <= 0.0)
@@ -1066,7 +1066,7 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
     }
 
 
-    if   (radius > 0.5)
+    if (true)//(radius > 0.5)
     {
         ro3 = ro_H4 - *T_do * (Potok_H4[0] / Volume + ro_H4 * v_H4 / y - q1_H4);
         if (ro3 <= 0)
