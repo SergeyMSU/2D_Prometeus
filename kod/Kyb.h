@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "sensor.h"
 using namespace std;
 class Kyb;
 
@@ -41,6 +42,13 @@ public:
 
 	///  опирует значени€ переменных из B в A
 	friend void Copy(Kyb* A, Kyb* B);
+
+	// ѕринадлежит ли точка €чейке?
+	bool Belong_slow(const double& xx, const double& yy, const double& DX, const double& DY);
+	// ‘ункци€ сама находит размер €чейки по переданным глобальным размерам, поэтому работает достаточно медленно
+
+	bool Belong_fast(const double& xx, const double& yy, const double& dx, const double& dy);
+	// Ѕыстрый аналог предыдущей функции, но нужно подавать размеры €чейки в неЄ
 
 private:
 	void initialization(double, double, int);

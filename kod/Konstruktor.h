@@ -2,6 +2,7 @@
 #include <vector>
 #include "Kyb.h"
 #include "Cell.h"
+#include "sensor.h"
 using namespace std;
 struct Cell;
 
@@ -16,6 +17,17 @@ public:
 	double x_min;
 	double x_max;
 	double y_max;
+	double sqv_1;
+	double sqv_2;
+	double sqv_3;
+	double sqv_4;
+	double sqv_5;
+	double sum_s;
+	int Number1;
+	int Number2;
+	int Number3;
+	int Number4;
+	int AllNumber;
 	Kyb* G1;
 	Kyb* G2;
 	Kyb* G3;
@@ -24,6 +36,10 @@ public:
 	vector <Kyb*> Sosed_2;
 	vector <Kyb*> Sosed_3;
 	vector <Kyb*> Sosed_4;
+	vector <Kyb*> Boandary_1;  // Ячейки - граничащие с правой границей
+	vector <Kyb*> Boandary_2;  // Ячейки - граничащие с левой границей
+	vector <Kyb*> Boandary_3;  // Ячейки - граничащие с верхней границей
+	vector<Sensor*> Sensors;
 
 
 	Konstruktor(int a, int b, double xmin, double xmax, double ymax);      /// Конструктор класса
@@ -58,7 +74,7 @@ public:
 	void Download_setka_multifluid(string name);
 
 
-	// Механика
+	// Газовая данамика
 	void initial_condition();
 	void read_Cuda_massiv(double* ro, double* p, double* u, double* v, double* QQ);
 	void read_Cuda_massiv(double* ro, double* p, double* u, double* v, double* QQ,//
@@ -68,6 +84,24 @@ public:
 							double* ro_H4, double* p_H4, double* u_H4, double* v_H4);
 	void print_Tecplot(void);
 	void print_Tecplot_multifluid(void);
+
+
+	// Монте-Карло
+	void Velosity_initial(Sensor* s, double& Vx, double& Vy, double& Vz);
+	void Velosity_initial2(Sensor* s, double& Vx, double& Vy, double& Vz);
+	void Change_Velosity(Sensor* s, const double& Ur, const double& Uthe, const double& Uphi, //
+		const double& Vr, const double& Vthe, const double& Vphi, double& X, double& Y, double& Z, const double& cp);
+	void M_K(void);  // основная функция запуска чатиц
+	void Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Kyb* ind, const double& mu);
+	bool Flying_exchange(double& KSI, double& Vx, double& Vy, double& Vz, double& X, double& Y,//
+		double& Z, Kyb*& next, Kyb* head, Kyb* prev, const double& mu, double& I_do);
+	bool Peresechenie(const double& x0, const double& y0, const double& dx, const double& dy, const double& x, const double& y, const double& z, //
+		const double& Vx, const double& Vy, const double& Vz, int& mode, double& t);
+
+
+
+	Kyb* Konstruktor::Belong_point(int b, const double& x, const double& y);  // Ищет какой граничной ячейке принадлежит точка
+	// b - это номер границы   Boandary_b
 
 
 	// Блок проекции решения на ось x
@@ -85,5 +119,11 @@ private:
 	void New_design(void);
 	void konectiviti(void);
 	void number(void);
+
+	void peresich(const double& y, const double& z, const double& Vy, const double& Vz, const double& R, double& t1, double& t2);
+	// Находит пересечение со сферой, вспомогательная функция
+
+	double minplus(const double& x, const double& y);
+	double polar_angle(const double& x, const double& y);
 };
 

@@ -54,3 +54,33 @@ void Copy(Kyb * A, Kyb * B)
 	return;
 }
 
+bool Kyb::Belong_slow(const double& xx, const double& yy, const double& DX, const double& DY)
+{
+	double dx = (DX / pow(2, this->size - 1)) / 2.0;   // Половина длины ячейки
+	double dy = (DY / pow(2, this->size - 1)) / 2.0;   // Половина ширины ячейки
+
+	if (xx >= this->x - dx && xx <= this->x + dx)
+	{
+		if (yy >= this->y - dy && yy <= this->y + dy)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool Kyb::Belong_fast(const double& xx, const double& yy, const double& dx, const double& dy)
+{
+
+	if (xx >= this->x - dx && xx <= this->x + dx)
+	{
+		if (yy >= this->y - dy && yy <= this->y + dy)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
