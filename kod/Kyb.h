@@ -11,6 +11,8 @@ class Kyb
 public:
 	double x;                // Координата центра ячейки
 	double y;                // Координата центра ячейки
+	double dx;               
+	double dy;               
 	double ro;
 	double p;
 	double u;

@@ -97,9 +97,9 @@ public:
 	void Change_Velosity(Sensor* s, const double& Ur, const double& Uthe, const double& Uphi, //
 		const double& Vr, const double& Vthe, const double& Vphi, double& X, double& Y, double& Z, const double& cp);
 	void M_K(void);  // основная функция запуска чатиц
-	void Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Kyb* ind, const double& mu);
+	void Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Kyb* ind, const double& mu, int ii = 0);
 	bool Flying_exchange(double& KSI, double& Vx, double& Vy, double& Vz, double& X, double& Y,//
-		double& Z, Kyb*& next, Kyb* head, Kyb* prev, const double& mu, double& I_do);
+		double& Z, Kyb*& next, Kyb* head, Kyb* prev, const double& mu, double& I_do, int ii = 0);
 	bool Peresechenie(const double& x0, const double& y0, const double& dx, const double& dy, const double& x, const double& y, const double& z, //
 		const double& Vx, const double& Vy, const double& Vz, int& mode, double& t);
 

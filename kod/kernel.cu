@@ -53,6 +53,7 @@ int main()
     //K.print_konectiviti_short();
     K.Download_setka_multifluid("all_save_14_multifluid.txt");
     K.M_K_training();
+
     K.M_K();
     K.print_Tecplot();
     //K.initial_condition();   // Заполнение начальными условиями

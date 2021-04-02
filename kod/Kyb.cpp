@@ -100,28 +100,50 @@ void Kyb::Setup_boandary(const double& DX, const double& DY)
 
 	for (auto& i : this->sosed)
 	{
-		dx2 = (DX / pow(2, i->size - 1)) / 2.0;   // Половина длины ячейки
-		dy2 = (DY / pow(2, i->size - 1)) / 2.0;   // Половина ширины ячейки
-		if (fabs(fabs(this->x - i->x) - dx1 - dx2) < geo)
+		if (i->number >= 0)
 		{
-			n1 = (i->x - this->x);
-			if (n1 > 0)
+			dx2 = (DX / pow(2, i->size - 1)) / 2.0;   // Половина длины ячейки
+			dy2 = (DY / pow(2, i->size - 1)) / 2.0;   // Половина ширины ячейки
+			if (fabs(fabs(this->x - i->x) - dx1 - dx2) < geo)
+			{
+				n1 = (i->x - this->x);
+				if (n1 > 0)
+				{
+					this->boandary_1.push_back(i);
+				}
+				else
+				{
+					this->boandary_2.push_back(i);
+				}
+			}
+			else if (fabs(fabs(this->y - i->y) - dy1 - dy2) < geo)
+			{
+				n2 = (i->y - this->y);
+				if (n2 > 0)
+				{
+					this->boandary_3.push_back(i);
+				}
+				else
+				{
+					this->boandary_4.push_back(i);
+				}
+			}
+		}
+		else
+		{
+			if (i->number == -1)
 			{
 				this->boandary_1.push_back(i);
 			}
-			else
+			if (i->number == -2)
 			{
 				this->boandary_2.push_back(i);
 			}
-		}
-		else if (fabs(fabs(this->y - i->y) - dy1 - dy2) < geo)
-		{
-			n2 = (i->y - this->y);
-			if (n2 > 0)
+			if (i->number == -3)
 			{
 				this->boandary_3.push_back(i);
 			}
-			else
+			if (i->number == -4)
 			{
 				this->boandary_4.push_back(i);
 			}

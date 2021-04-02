@@ -739,10 +739,10 @@ void Konstruktor::Drobim(double x0, double y0, double r1, double r2)
 		{
 			this->droblenie2_hand(this->all_Kyb[i]);
 			ll--;
-			if (ll % 25000 == 0)
+			/*if (ll % 25000 == 0)
 			{
 				cout << ll << endl;
-			}
+			}*/
 		}
 	}
 	this->number();
@@ -775,10 +775,10 @@ void Konstruktor::Drobim(double x1, double x2, double r1)
 		{
 			this->droblenie2_hand(this->all_Kyb[i]);
 			ll--;
-			if (ll % 25000 == 0)
+			/*if (ll % 25000 == 0)
 			{
 				cout << ll << endl;
-			}
+			}*/
 		}
 	}
 	this->number();
@@ -1213,11 +1213,13 @@ void Konstruktor::M_K_training(void)
 	this->sqv_3 = (0.0000282543 * pi * kv(this->y_max));
 	this->sqv_4 = (2.54189 * pi * kv(350.0));
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 2834190 * 5;
-	this->Number2 = (647838 * 5);
-	this->Number3 = (16200 * 5);
-	this->Number4 = (2025000 * 15);
+	this->Number1 = 2834190 * 2;
+	this->Number2 = (647838 * 2);
+	this->Number3 = (16200 * 2);
+	this->Number4 = (2025000 * 10);
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
+
+	cout << "ALL NUMBER = " << this->AllNumber << endl;
 
 	for (auto& i : this->all_Kyb)
 	{
@@ -1262,9 +1264,9 @@ void Konstruktor::M_K(void)
 		mu3 = ((this->sqv_3) / this->sum_s) * (1.0 * this->AllNumber / this->Number3);
 		mu4 = ((this->sqv_4) / this->sum_s) * (1.0 * this->AllNumber / this->Number4);
 		Sensor* sens = Sensors[index];
-		mut_1.lock();
+		/*mut_1.lock();
 		cout << index << " potok  is  270" << endl;
-		mut_1.unlock();
+		mut_1.unlock();*/
 
 		for (int ii = 0; ii < Number1 / 270; ii++)  //
 		{
@@ -1287,7 +1289,7 @@ void Konstruktor::M_K(void)
 			// ÐÀÁÎÒÀÅÒ ÒÎËÜÊÎ ÅÑËÈ ÐÀÇÌÅÐÛ ÃÐÀÍÈ×ÍÛÕ ß×ÅÅÊ - ÈÇÍÀ×ÀËÜÍÛÅ DX DY (èíà÷å íóæíî ïîìåíÿòü ôóíêöèþ)
 
 
-			Fly_exchenge(sens, x_max - geo, y_0, z_0, a, b, c, Point, mu1);
+			Fly_exchenge(sens, x_max - geo, y_0, z_0, a, b, c, Point, mu1, ii);
 		}
 		for (int ii = 0; ii < Number2 / 270; ii++)  // Ñ áîêîâîé ïîâåðõíîñòè
 		{
@@ -1311,7 +1313,7 @@ void Konstruktor::M_K(void)
 
 			Kyb* Point = Belong_point(3, x_0, y_max - geo);
 
-			Fly_exchenge(sens, x_0, y_0, z_0, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi, Point, mu2);
+			Fly_exchenge(sens, x_0, y_0, z_0, Vx, cos(phi) * Vr - sin(phi) * Vphi, sin(phi) * Vr + cos(phi) * Vphi, Point, mu2, ii);
 		}
 		for (int ii = 0; ii < Number3 / 270; ii++)
 		{
@@ -1332,7 +1334,7 @@ void Konstruktor::M_K(void)
 
 			Kyb* Point = Belong_point(2, x_min + geo, r_0);
 
-			Fly_exchenge(sens, x_min + geo, y_0, z_0, a, b, c, Point, mu1);
+			Fly_exchenge(sens, x_min + geo, y_0, z_0, a, b, c, Point, mu3, ii);
 		}
 		for (int ii = 0; ii < Number4 / 270; ii++)
 		{
@@ -1353,7 +1355,7 @@ void Konstruktor::M_K(void)
 
 			Kyb* Point = Belong_point(1, x_max - geo, r_0);
 
-			Fly_exchenge(sens, x_max - geo, y_0, z_0, a, b, c, Point, mu1);
+			Fly_exchenge(sens, x_max - geo, y_0, z_0, a, b, c, Point, mu4, ii);
 		}
 	}
 
@@ -1379,7 +1381,7 @@ void Konstruktor::M_K(void)
 	}
 }
 
-void Konstruktor::Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Kyb* ind, const double& mu)
+void Konstruktor::Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0, double Vx, double Vy, double Vz, Kyb* ind, const double& mu, int ii)
 {
 	Kyb* next = nullptr;
 	Kyb* prev = nullptr;
@@ -1394,10 +1396,13 @@ void Konstruktor::Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0,
 	double uu, vv, ww;
 
 	do
-	{
-		//cout << X << " " << sqrt(kv(Y) + kv(Z)) << " " << 0 << endl;
-		//cout << head->x << " " << head->y << " " << 1 << endl;
-		if (Flying_exchange(KSI, Vx, Vy, Vz, X, Y, Z, next, head, prev, mu, I_do) == false)
+	{	
+		/*if (ii == 0)
+		{
+			cout << X << " " << sqrt(kv(Y) + kv(Z)) << " " << 3 << endl;
+			cout << head->x << " " << head->y << " " << 4 << endl;
+		}*/
+		if (Flying_exchange(KSI, Vx, Vy, Vz, X, Y, Z, next, head, prev, mu, I_do, ii) == false)
 		{
 			break;
 		}
@@ -1437,7 +1442,7 @@ void Konstruktor::Fly_exchenge(Sensor* sens, double x_0, double y_0, double z_0,
 }
 
 bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& Vz, double& X, double& Y,//
-	double& Z, Kyb*& next, Kyb* head, Kyb* prev, const double& mu, double& I_do)
+	double& Z, Kyb*& next, Kyb* head, Kyb* prev, const double& mu, double& I_do, int ii)
 	// Vx, Vy, Vz - ñêîðîñòü àòîìà âîäîðîäà
 	// X,Y,Z - êîîðäèíàòà àòîìà
 	// head - òåêóùàÿ ÿ÷åéêè
@@ -1458,14 +1463,31 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 	double vy = head->v;
 	double ro = head->ro;
 
+
+	/*while (head->Belong_fast(X, sqrt(kv(Y) + kv(Z)), dx, dy) == false)
+	{
+		double alpha = polar_angle(Y, Z);
+		double yy, zz;
+		yy = y0 * cos(alpha);
+		zz = y0 * sin(alpha);
+		double nn = sqrt(kv(X - x0) + kv(Y - yy) + kv(Z - zz));
+		double geot = dx / 9000.0;
+		X = X - geot * (X - x0) / nn;
+		Y = Y - geot * (Y - yy) / nn;
+		Z = Z - geot * (Z - zz) / nn;
+
+		if (ii == 0)
+		{
+			cout << X << " " << sqrt(kv(Y) + kv(Z)) << " " << 5 << endl;
+		}
+	}*/
+
 	while (Peresechenie(x0, y0, dx, dy, X, Y, Z, Vx, Vy, Vz, mode, time) == false)
 	{
 		step++;
 		if (step > 6)
 		{
-			//cout << "Error  1605323534526853234245436" << endl;
-			//cout << "EROR:  " << x0 << " " << y0 << endl;
-			exit(-1);
+			cout << "Error  1605323534526853234245436" << endl;
 			return false;
 		}
 		double alpha = polar_angle(Y, Z);
@@ -1473,7 +1495,7 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 		yy = y0 * cos(alpha);
 		zz = y0 * sin(alpha);
 		double nn = sqrt(kv(X - x0) + kv(Y - yy) + kv(Z - zz));
-		double geot = dx / 500.0;
+		double geot = dx / 100.0;
 		X = X - geot * (X - x0) / nn;
 		Y = Y - geot * (Y - yy) / nn;
 		Z = Z - geot * (Z - zz) / nn;
@@ -1564,6 +1586,15 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 					}
 				}
 				cout << "Ne nashol soseda   123143254rf3dwedwwefw" << endl;
+				/*for (auto& i : head->boandary_1)
+				{
+					cout << i->x << " " << i->y << " " << 0 << endl;
+				}
+				cout << X << " " << sqrt(kv(Y) + kv(Z)) << " " << 1 << endl;
+				cout << head->x << " " << head->y << " " << 2 << endl;
+				cout << head->boandary_1.size() << endl;
+				cout << ii << endl;
+				exit(-1);*/
 				return false;
 			}
 		}
@@ -1593,6 +1624,15 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 					}
 				}
 				cout << "Ne nashol soseda   wceferver34r3x4rc343r4" << endl;
+				/*for (auto& i : head->boandary_2)
+				{
+					cout << i->x << " " << i->y << " " << 0 << endl;
+				}
+				cout << X << " " << sqrt(kv(Y) + kv(Z)) << " " << 1 << endl;
+				cout << head->x << " " << head->y << " " << 2 << endl;
+				cout << head->boandary_2.size() << endl;
+				cout << ii << endl;
+				exit(-1);*/
 				return false;
 			}
 		}
@@ -1621,6 +1661,15 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 					}
 				}
 				cout << "Ne nashol soseda   ukuijhgfer435353" << endl;
+				/*for (auto& i : head->boandary_3)
+				{
+					cout << i->x << " " << i->y << " " << 0  << endl;
+				}
+				cout << X << " " << sqrt(kv(Y) + kv(Z)) << " " << 1 << endl;
+				cout << head->x << " " << head->y << " " << 2 << endl;
+				cout << head->boandary_3.size() << endl;
+				cout << ii << endl;
+				exit(-1);*/
 				return false;
 			}
 		}
@@ -1649,6 +1698,15 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 					}
 				}
 				cout << "Ne nashol soseda   wfcrfewv232345y6786v5vt5" << endl;
+				/*for (auto& i : head->boandary_4)
+				{
+					cout << i->x << " " << i->y << " " << 0 << endl;
+				}
+				cout << X << " " << sqrt(kv(Y) + kv(Z)) << " " << 1 << endl;
+				cout << head->x << " " << head->y << " " << 2 << endl;
+				cout << head->boandary_4.size() << endl;
+				cout << ii << endl;
+				exit(-1);*/
 				return false;
 			}
 		}
@@ -1734,7 +1792,7 @@ Kyb* Konstruktor::Belong_point(int b, const double& x, const double& y)
 	{
 		for (auto& i : this->Boandary_1)
 		{
-			if (i->Belong_fast(x, y, this->DX / 2.0, this->DY / 2.0))
+			if (i->Belong_slow(x, y, this->DX, this->DY))
 			{
 				return i;
 			}
@@ -1744,7 +1802,7 @@ Kyb* Konstruktor::Belong_point(int b, const double& x, const double& y)
 	{
 		for (auto& i : this->Boandary_2)
 		{
-			if (i->Belong_fast(x, y, this->DX / 2.0, this->DY / 2.0))
+			if (i->Belong_slow(x, y, this->DX, this->DY))
 			{
 				return i;
 			}
@@ -1754,7 +1812,7 @@ Kyb* Konstruktor::Belong_point(int b, const double& x, const double& y)
 	{
 		for (auto& i : this->Boandary_3)
 		{
-			if (i->Belong_fast(x, y, this->DX / 2.0, this->DY / 2.0))
+			if (i->Belong_slow(x, y, this->DX, this->DY))
 			{
 				return i;
 			}
