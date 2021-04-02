@@ -73,6 +73,7 @@ public:
 	void Save_setka_MK(string name);
 	void Download_setka(string name);
 	void Download_setka_multifluid(string name);
+	void Download_setka_MK(string name);
 
 
 	// Газовая данамика

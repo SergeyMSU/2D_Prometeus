@@ -262,7 +262,7 @@ void Konstruktor::print_Tecplot(void)
 	{
 		double Max = 0.0;
 		double QQ = 0.0;
-		if (i->ro > 0.000000000001)
+		if (i->ro > 0.00000001)
 		{
 			QQ = i->Q / i->ro;
 			Max = sqrt(kvv(i->u, i->v, 0.0) / (ggg * i->p / i->ro));
@@ -949,6 +949,20 @@ void Konstruktor::Save_setka_MK(string name)
 	fout.close();
 }
 
+void Konstruktor::Download_setka_MK(string name)
+{
+	int ll = this->all_Kyb.size();
+	ifstream fout;
+	fout.open(name);
+
+	for (auto& i : this->all_Kyb)
+	{
+		fout >> i->ro >> i->p >> i->u >> i->v >> i->Q >> i->F_n >> i->F_u >> i->F_v >> i->F_T >> i->I_u >> i->I_v >> i->I_T;
+	}
+
+	fout.close();
+}
+
 void Konstruktor::Save_setka_multifluid(string name)
 {
 	int ll = this->all_Kyb.size();
@@ -1038,6 +1052,10 @@ vector <Kyb*> Konstruktor::Get_projection(void)
 				auto C1 = new Kyb(i->x, 0.0);
 				C1->ro = linear_funk(i->y, i->ro, j->y, j->ro, 0.0);
 				C1->p = linear_funk(i->y, i->p, j->y, j->p, 0.0);
+				if (C1->p <= 0.0)
+				{
+					C1->p = i->p;
+				}
 				C1->u = linear_funk(i->y, i->u, j->y, j->u, 0.0);
 				C1->v = linear_funk(i->y, i->v, j->y, j->v, 0.0);
 				C1->Q = linear_funk(i->y, i->Q, j->y, j->Q, 0.0);
@@ -1578,29 +1596,68 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 		alpha = polar_angle(Y + 0.5 * time * Vy, Z + 0.5 * time * Vz);  // Гарантирует расчёт угла в середине пути
 	}
 
-	//Суммируем значения в источники
-	u = sqrt(kvv(Vx - vx, Vy - vy * cos(alpha), Vz - vy * sin(alpha)));
-	uz = Velosity_1(u, cp);
-	uz_M = Velosity_2(u, cp) / (uz * kv(cp) * cp * pi * sqrtpi);
-	uz_E = Velosity_3(u, cp);
-	u1 = vx - Vx;
-	u2 = vy * cos(alpha) - Vy;
-	u3 = vy * sin(alpha) - Vz;
-	double skalar = Vx * u1 + Vy * u2 + Vz * u3;
+
+	double dalpha = fabs(polar_angle(Y + time * Vy, Z + time * Vz) - polar_angle(Y, Z));
+	if (vy > 0.01 * sqrt(kv(vx) + kv(vy)) && dalpha > pi / 90.0)
+	{
+		double tt;
+		int n = ((int)(dalpha / (pi / 90.0)) + 1);
+		double dt = time / (1.0 * n);
+		for (int i = 0; i < n; i++)
+		{
+			tt = (i + 0.5) * dt;
+			alpha = polar_angle(Y + tt * Vy, Z + tt * Vz);
+			u = sqrt(kvv(Vx - vx, Vy - vy * cos(alpha), Vz - vy * sin(alpha)));
+			uz = Velosity_1(u, cp);
+			uz_M = Velosity_2(u, cp) / (uz * kv(cp) * cp * pi * sqrtpi);
+			uz_E = Velosity_3(u, cp);
+			u1 = vx - Vx;
+			u2 = vy * cos(alpha) - Vy;
+			u3 = vy * sin(alpha) - Vz;
+			double skalar = Vx * u1 + Vy * u2 + Vz * u3;
 
 
-	head->mut.lock();
-	head->F_n += time * mu;
-	head->F_u += time * Vx * mu;
-	head->F_v += time * (Vy * cos(alpha) + Vz * sin(alpha)) * mu;
-	head->F_T += time * kvv(Vx, Vy, Vz) * mu;
+			head->mut.lock();
+			head->F_n += dt * mu;
+			head->F_u += dt * Vx * mu;
+			head->F_v += dt * (Vy * cos(alpha) + Vz * sin(alpha)) * mu;
+			head->F_T += dt * kvv(Vx, Vy, Vz) * mu;
 
 
-	head->I_u += mu * time * uz_M * uz * sigma(uz_M) * u1 / u;
-	head->I_v += mu * time * uz_M * uz * sigma(uz_M) * (u2 * cos(alpha) + u3 * sin(alpha)) / u;
+			head->I_u += mu * dt * uz_M * uz * sigma(uz_M) * u1 / u;
+			head->I_v += mu * dt * uz_M * uz * sigma(uz_M) * (u2 * cos(alpha) + u3 * sin(alpha)) / u;
 
-	head->I_T += mu * time * (0.5 * (3.0 * kv(cp) + 2.0 * kv(u)) * uz_E * sigma(uz_E) + 2.0 * uz_M * uz * sigma(uz_M) * skalar / u);
-	head->mut.unlock();
+			head->I_T += mu * dt * (0.5 * (3.0 * kv(cp) + 2.0 * kv(u)) * uz_E * sigma(uz_E) + 2.0 * uz_M * uz * sigma(uz_M) * skalar / u);
+			head->mut.unlock();
+		}
+	}
+	else
+	{
+		//Суммируем значения в источники
+		u = sqrt(kvv(Vx - vx, Vy - vy * cos(alpha), Vz - vy * sin(alpha)));
+		uz = Velosity_1(u, cp);
+		uz_M = Velosity_2(u, cp) / (uz * kv(cp) * cp * pi * sqrtpi);
+		uz_E = Velosity_3(u, cp);
+		u1 = vx - Vx;
+		u2 = vy * cos(alpha) - Vy;
+		u3 = vy * sin(alpha) - Vz;
+		double skalar = Vx * u1 + Vy * u2 + Vz * u3;
+
+
+		head->mut.lock();
+		head->F_n += time * mu;
+		head->F_u += time * Vx * mu;
+		head->F_v += time * (Vy * cos(alpha) + Vz * sin(alpha)) * mu;
+		head->F_T += time * kvv(Vx, Vy, Vz) * mu;
+
+
+		head->I_u += mu * time * uz_M * uz * sigma(uz_M) * u1 / u;
+		head->I_v += mu * time * uz_M * uz * sigma(uz_M) * (u2 * cos(alpha) + u3 * sin(alpha)) / u;
+
+		head->I_T += mu * time * (0.5 * (3.0 * kv(cp) + 2.0 * kv(u)) * uz_E * sigma(uz_E) + 2.0 * uz_M * uz * sigma(uz_M) * skalar / u);
+		head->mut.unlock();
+	}
+
 
 
 	// Передвигаем координату

@@ -1108,3 +1108,210 @@ __global__ void Cuda_main_5_komponent(int* NN, double* X, double* Y, int* Size,/
 
 }
 
+__global__ void Cuda_main_HLLDQ_M_K(int* NN, double* X, double* Y, int* Size,//
+    double* RO1, double* RO2, double* Q1, double* Q2, double* P1, double* P2, double* U1, double* U2, double* V1, double* V2,//
+    double* I_u, double* I_v, double* I_T, int* SOSED, int* L, int* R, double* T, double* T_do, int step_, double DX, double DY, int metod)
+{
+    int index = blockIdx.x * blockDim.x + threadIdx.x; // √лобальный индекс текущего потока
+    if (index > * NN - 1)
+    {
+        return;
+    }
+    double x, y, ro, p, u, v, Q;
+    int size = Size[index];
+    double dx = (DX / pow(2, size - 1)) / 2.0;   // ѕоловина длины €чейки
+    double dy = (DY / pow(2, size - 1)) / 2.0;   // ѕоловина ширины €чейки
+    int l = L[index];
+    int r = R[index];
+    x = X[index];
+    y = Y[index];
+    ro = RO1[index];
+    p = P1[index];
+    u = U1[index];
+    v = V1[index];
+    Q = Q1[index];
+    double radius = sqrt(kv(x) + kv(y));
+
+
+    if (radius <= Distant) // || (ddd <= 4.0 && x > -5 && x < 0) ) //(ddd < 5.76 || ddd2 <= 2.0) //1.5
+    {
+        RO2[index] = ro;
+        P2[index] = p;
+        U2[index] = u;
+        V2[index] = v;
+        Q2[index] = Q;
+    }
+    else
+    {
+        double PQ = 0.0;
+        double n1 = 0.0;
+        double n2 = 0.0;
+        double dist = 0.0;
+        double P[4] = { 0.0 };
+        P[0] = P[1] = P[2] = P[3] = 0.0;
+        double Potok[5] = { 0.0 };
+        Potok[0] = Potok[1] = Potok[2] = Potok[3] = Potok[4] = 0.0;
+        double tmin = 10000000;
+        double Volume = dx * dy * 4.0;
+        int ii = 0;
+        double x2, y2, dx2, dy2, ro2, p2, u2, v2, Q_2, size2;
+        double roC = 1.0;
+        double pC = 1.0;
+        double uC = Velosity_inf;
+        double vC = 0.0;
+        double QC = 100.0;
+        double u1_polar, v1_polar;
+
+        for (int i = l; i <= r; i++)
+        {
+            ii = SOSED[i];
+            if (ii >= 0)
+            {
+                x2 = X[ii];
+                y2 = Y[ii];
+                size2 = Size[ii];
+                dx2 = (DX / pow(2, size2 - 1)) / 2.0;   // ѕоловина длины €чейки
+                dy2 = (DY / pow(2, size2 - 1)) / 2.0;   // ѕоловина ширины €чейки
+                ro2 = RO1[ii];
+                p2 = P1[ii];
+                u2 = U1[ii];
+                v2 = V1[ii];
+                Q_2 = Q1[ii];
+                double S = get_square(x, y, dx, dy, x2, y2, dx2, dy2, n1, n2, dist);
+
+                u1_polar = u;
+                v1_polar = v;
+
+                if (radius < 100)
+                {
+                    polar_perenos(x, y, x + n1 * dx, y + n2 * dy, u1_polar, v1_polar);
+                    polar_perenos(x2, y2, x2 - n1 * dx2, y2 - n2 * dy2, u2, v2);
+                }
+
+
+                tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro, Q, p, u1_polar, v1_polar, ro2, Q_2, p2, u2, v2, P, PQ, n1, n2, dist, metod));
+
+                for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
+                {
+                    Potok[k] = Potok[k] + P[k] * S;
+                }
+                Potok[4] = Potok[4] + PQ * S;
+            }
+            else if (ii == -1)
+            {
+                double S = dy * 2.0;
+                n1 = 1.0;
+                n2 = 0.0;
+                dist = dx;
+
+                tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro, Q, p, u, v, roC, QC, pC, uC, vC, P, PQ, n1, n2, dist, metod));
+
+                for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
+                {
+                    Potok[k] = Potok[k] + P[k] * S;
+                }
+                Potok[4] = Potok[4] + PQ * S;
+            }
+            else if (ii == -2)
+            {
+                double S = dy * 2.0;
+                n1 = -1.0;
+                n2 = 0.0;
+                dist = dx;
+
+                double uu = u;
+                if (uu > Velosity_inf && y < 300)
+                {
+                    uu = Velosity_inf;
+                }
+
+                tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro, Q, p, u, v, ro, Q, p, uu, v, P, PQ, n1, n2, dist, metod));
+
+                for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
+                {
+                    Potok[k] = Potok[k] + P[k] * S;
+                }
+                Potok[4] = Potok[4] + PQ * S;
+            }
+            else if (ii == -3)
+            {
+                double S = dx * 2.0;
+                n1 = 0.0;
+                n2 = 1.0;
+                dist = dy;
+
+                tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro, Q, p, u, v, ro, Q, p, u, v, P, PQ, n1, n2, dist, metod));
+
+                for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
+                {
+                    Potok[k] = Potok[k] + P[k] * S;
+                }
+                Potok[4] = Potok[4] + PQ * S;
+            }
+            else if (ii == -4)
+            {
+                double S = dx * 2.0;
+                n1 = 0.0;
+                n2 = -1.0;
+                dist = dy;
+
+                u1_polar = u;
+                v1_polar = v;
+
+                if (radius < 100)
+                {
+                    u1_polar = u;
+                    v1_polar = v;
+                    polar_perenos(x, y, x + n1 * dx, y + n2 * dy, u1_polar, v1_polar);
+                }
+
+
+                tmin = min(tmin, HLLC_2d_Korolkov_b_s(ro, Q, p, u1_polar, v1_polar, ro, Q, p, //
+                    u1_polar, -v1_polar, P, PQ, n1, n2, dist, metod));
+
+                for (int k = 0; k < 4; k++)  // —уммируем все потоки в €чейке
+                {
+                    Potok[k] = Potok[k] + P[k] * S;
+                }
+                Potok[4] = Potok[4] + PQ * S;
+            }
+            else
+            {
+                printf("Error 12438wedew4353jdyu. Ne doljni suda popadat = %d \n", ii);
+            }
+        }
+
+        double ro3, p3, u3, v3, Q33;
+
+        ro3 = ro - *T_do * (Potok[0] / Volume + ro * v / y);
+        Q33 = Q - (*T_do / Volume) * Potok[4] - *T_do * Q * v / y;
+        if (ro3 <= 0)
+        {
+            printf("Problemsssss  ro < 0! %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf\n", x, y, dx, dy, ro, p, u, v, Q);
+            ro3 = 0.00001;
+        }
+        u3 = (ro * u - *T_do * (Potok[1] / Volume + ro * v * u / y - (n_p_LISM_ / Kn_) * I_u[index])) / ro3;
+        v3 = (ro * v - *T_do * (Potok[2] / Volume + ro * v * v / y - (n_p_LISM_ / Kn_) * I_v[index])) / ro3;
+        p3 = (((p / (ggg - 1) + ro * (u * u + v * v) * 0.5) - *T_do * (Potok[3] / Volume + //
+            +v * (ggg * p / (ggg - 1) + ro * (u * u + v * v) * 0.5) / y - (n_p_LISM_ / Kn_) * I_T[index])) - //
+            0.5 * ro3 * (u3 * u3 + v3 * v3)) * (ggg - 1);
+        if (p3 <= 0)
+        {
+            p3 = 0.000001;
+        }
+
+        Q2[index] = Q33;
+        RO2[index] = ro3;
+        P2[index] = p3;
+        U2[index] = u3;
+        V2[index] = v3;
+
+        if (*T > tmin)
+        {
+            *T = tmin;
+            __threadfence();
+        }
+    }
+
+}
+
