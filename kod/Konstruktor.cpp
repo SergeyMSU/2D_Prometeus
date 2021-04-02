@@ -217,7 +217,7 @@ void Konstruktor::print_Tecplot(void)
 	ofstream fout;
 	string name_f = "2D_tecplot.txt";
 	fout.open(name_f);
-	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Y\", \"r\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\",\"F_n\",\"F_u\",\"F_v\",\"F_T\", ZONE T = \"HP\"" << endl;
+	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Y\", \"r\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\",\"F_n\",\"F_u\",\"F_v\",\"F_T\", \"I_u\",\"I_v\",\"I_T\", ZONE T = \"HP\"" << endl;
 	for (auto& i : this->all_Kyb)
 	{
 			double Max = 0.0;
@@ -231,7 +231,8 @@ void Konstruktor::print_Tecplot(void)
 			fout << i->x * r_o << " " << i->y * r_o << " " << sqrt(i->x * r_o * i->x * r_o + i->y * r_o * i->y * r_o) << //
 				" " << i->ro * ro_o << " " << i->p * p_o << " " //
 				<< i->u * u_o << " " << i->v * u_o << " " << Max << " "  << QQ << " " << i->F_n * ro_o << " " << //
-				i->F_u * u_o << " " << i->F_v * u_o << " " << i->F_T << " " << endl;
+				i->F_u * u_o << " " << i->F_v * u_o << " " << i->F_T << " " <<//
+				i->I_u << " " << i->I_v << " " << i->I_T << " " << endl;
 		
 	}
 	for (auto& i : res)
@@ -247,14 +248,15 @@ void Konstruktor::print_Tecplot(void)
 		fout << i->x * r_o << " " << i->y * r_o << " " << sqrt(i->x * r_o * i->x * r_o + i->y * r_o * i->y * r_o) << //
 			" " << i->ro * ro_o << " " << i->p * p_o << " " //
 			<< i->u * u_o << " " << i->v * u_o << " " << Max << " " << QQ << " " << i->F_n * ro_o << " " << //
-			i->F_u * u_o << " " << i->F_v * u_o << " " << i->F_T << " " << endl;
+			i->F_u * u_o << " " << i->F_v * u_o << " " << i->F_T << " " <<//
+			i->I_u << " " << i->I_v << " " << i->I_T << " " << endl;
 
 	}
 	fout.close();
 
 	name_f = "1D_tecplot_multifluid.txt";
 	fout.open(name_f);
-	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\",\"F_n\",\"F_u\",\"F_v\",\"F_T\", ZONE T = \"HP\"" << endl;
+	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\",\"F_n\",\"F_u\",\"F_v\",\"F_T\", \"I_u\",\"I_v\",\"I_T\", ZONE T = \"HP\"" << endl;
 
 	for (auto& i : res)
 	{
@@ -269,7 +271,8 @@ void Konstruktor::print_Tecplot(void)
 		fout << i->x * r_o << //
 			" " << i->ro * ro_o << " " << i->p * p_o << " " //
 			<< i->u * u_o << " " << i->v * u_o << " " << Max << " " << QQ << " " << i->F_n * ro_o << " " << //
-			i->F_u * u_o << " " << i->F_v * u_o << " " << i->F_T << " " << endl;
+			i->F_u * u_o << " " << i->F_v * u_o << " " << i->F_T << " " <<//
+			i->I_u << " " << i->I_v << " " << i->I_T << " " << endl;
 	}
 	fout.close();
 }
@@ -931,6 +934,21 @@ void Konstruktor::Save_setka(string name)
 	fout.close();
 }
 
+void Konstruktor::Save_setka_MK(string name)
+{
+	int ll = this->all_Kyb.size();
+	ofstream fout;
+	fout.open("MK_" + name);
+
+	for (auto& i : this->all_Kyb)
+	{
+		fout << i->ro << " " << i->p << " " << i->u << " " << i->v << " " << i->Q << //
+			" " << i->F_n << " " << i->F_u << " " << i->F_v << " " << i->F_T << " " << i->I_u << " " << i->I_v << " " << i->I_T << endl;
+	}
+
+	fout.close();
+}
+
 void Konstruktor::Save_setka_multifluid(string name)
 {
 	int ll = this->all_Kyb.size();
@@ -1043,6 +1061,15 @@ vector <Kyb*> Konstruktor::Get_projection(void)
 				C1->p_H4 = linear_funk(i->y, i->p_H4, j->y, j->p_H4, 0.0);
 				C1->u_H4 = linear_funk(i->y, i->u_H4, j->y, j->u_H4, 0.0);
 				C1->v_H4 = linear_funk(i->y, i->v_H4, j->y, j->v_H4, 0.0);
+
+				C1->F_n = linear_funk(i->y, i->F_n, j->y, j->F_n, 0.0);
+				C1->F_u = linear_funk(i->y, i->F_u, j->y, j->F_u, 0.0);
+				C1->F_v = linear_funk(i->y, i->F_v, j->y, j->F_v, 0.0);
+				C1->F_T = linear_funk(i->y, i->F_T, j->y, j->F_T, 0.0);
+
+				C1->I_u = linear_funk(i->y, i->I_u, j->y, j->I_u, 0.0);
+				C1->I_v = linear_funk(i->y, i->I_v, j->y, j->I_v, 0.0);
+				C1->I_T = linear_funk(i->y, i->I_T, j->y, j->I_T, 0.0);
 
 				res.push_back(C1);
 				break;
@@ -1213,10 +1240,10 @@ void Konstruktor::M_K_training(void)
 	this->sqv_3 = (0.0000282543 * pi * kv(this->y_max));
 	this->sqv_4 = (2.54189 * pi * kv(350.0));
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 2834190 * 2;
-	this->Number2 = (647838 * 2);
-	this->Number3 = (16200 * 2);
-	this->Number4 = (2025000 * 10);
+	this->Number1 = 2025000 * 5;
+	this->Number2 = (647838 * 3);
+	this->Number3 = (16200 * 3);
+	this->Number4 = (2025000 * 45);
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 
 	cout << "ALL NUMBER = " << this->AllNumber << endl;
@@ -1246,6 +1273,20 @@ void Konstruktor::M_K_training(void)
 void Konstruktor::M_K(void)
 {
 	mutex mut_1;
+
+	for (auto& i : this->all_Kyb)
+	{
+		i->F_n = 0.0;
+		i->F_u = 0.0;
+		i->F_v = 0.0;
+		i->F_T = 0.0;
+
+		i->I_u = 0.0;
+		i->I_v = 0.0;
+		i->I_T = 0.0;
+	}
+
+
 #pragma omp parallel for
 	for (int index = 0; index < 270; index++)
 	{
@@ -1264,9 +1305,9 @@ void Konstruktor::M_K(void)
 		mu3 = ((this->sqv_3) / this->sum_s) * (1.0 * this->AllNumber / this->Number3);
 		mu4 = ((this->sqv_4) / this->sum_s) * (1.0 * this->AllNumber / this->Number4);
 		Sensor* sens = Sensors[index];
-		/*mut_1.lock();
+		mut_1.lock();
 		cout << index << " potok  is  270" << endl;
-		mut_1.unlock();*/
+		mut_1.unlock();
 
 		for (int ii = 0; ii < Number1 / 270; ii++)  //
 		{
@@ -1364,16 +1405,31 @@ void Konstruktor::M_K(void)
 		double dx = (DX / pow(2, k->size - 1)) / 2.0;   // Половина длины ячейки
 		double dy = (DY / pow(2, k->size - 1)) / 2.0;   // Половина ширины ячейки
 
-		double no = (1.0 * AllNumber * (pi * kv(k->y + dy) * dx - pi * kv(k->y - dy) * dx));
+		double no = (1.0 * AllNumber * (pi * kv(k->y + dy) * (2.0 * dx) - pi * kv(k->y - dy) * (2.0 * dx)));
 
-		k->I_u = k->I_u / k->F_n;
-		k->I_v = k->I_v / k->F_n;
-		k->I_T = k->I_T / k->F_n;
+		if (k->F_n > 0)
+		{
+			k->I_u = k->I_u / k->F_n;
+			k->I_v = k->I_v / k->F_n;
+			k->I_T = k->I_T / k->F_n;
+
+			k->F_u = k->F_u / k->F_n;
+			k->F_v = k->F_v / k->F_n;
+			k->F_T = (2.0 / 3.0) * (k->F_T / k->F_n - kvv(k->F_u, k->F_v, 0.0));
+		}
+		else
+		{
+			k->I_u = 0.0;
+			k->I_v = 0.0;
+			k->I_T = 0.0;
+
+			k->F_n = 0.0;
+			k->F_u = 0.0;
+			k->F_v = 0.0;
+			k->F_T = 0.0;
+		}
 
 		k->F_n = sum_s * k->F_n / no;
-		k->F_u = sum_s * k->F_u / no;
-		k->F_v = sum_s * k->F_v / no;
-		k->F_T = sum_s * k->F_T / no;
 
 		k->I_u = -k->I_u;
 		k->I_v = -k->I_v;
@@ -1464,7 +1520,7 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 	double ro = head->ro;
 
 
-	/*while (head->Belong_fast(X, sqrt(kv(Y) + kv(Z)), dx, dy) == false)
+	while(head->Belong_fast(X, sqrt(kv(Y) + kv(Z)), dx, dy) == false)
 	{
 		double alpha = polar_angle(Y, Z);
 		double yy, zz;
@@ -1475,12 +1531,7 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 		X = X - geot * (X - x0) / nn;
 		Y = Y - geot * (Y - yy) / nn;
 		Z = Z - geot * (Z - zz) / nn;
-
-		if (ii == 0)
-		{
-			cout << X << " " << sqrt(kv(Y) + kv(Z)) << " " << 5 << endl;
-		}
-	}*/
+	}
 
 	while (Peresechenie(x0, y0, dx, dy, X, Y, Z, Vx, Vy, Vz, mode, time) == false)
 	{
@@ -1563,6 +1614,7 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 	{
 		if (mode == 1)
 		{
+			X = X + geo;
 			if (head->boandary_1.size() == 1)
 			{
 				if (head->boandary_1[0]->number < 0)
@@ -1600,6 +1652,7 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 		}
 		if (mode == 2)
 		{
+			X = X - geo;
 			//cout << "Size = " << head->boandary_2.size() << endl;
 			if (head->boandary_2.size() == 1)
 			{
@@ -1623,6 +1676,7 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 						return true;
 					}
 				}
+
 				cout << "Ne nashol soseda   wceferver34r3x4rc343r4" << endl;
 				/*for (auto& i : head->boandary_2)
 				{
@@ -1638,6 +1692,9 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 		}
 		if (mode == 3)
 		{
+			double rr = sqrt(kv(Y) + kv(Z));
+			Y = Y + geo * Y / rr;
+			Z = Z + geo * Z / rr;
 			if (head->boandary_3.size() == 1)
 			{
 				if (head->boandary_3[0]->number < 0)
@@ -1675,6 +1732,9 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 		}
 		if (mode == 4)
 		{
+			double rr = sqrt(kv(Y) + kv(Z));
+			Y = Y - geo * Y / rr;
+			Z = Z - geo * Z / rr;
 			if (head->boandary_4.size() == 1)
 			{
 				if (head->boandary_4[0]->number < 0)

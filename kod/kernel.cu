@@ -56,6 +56,8 @@ int main()
 
     K.M_K();
     K.print_Tecplot();
+
+    K.Save_setka_MK("all_save_15.txt");
     //K.initial_condition();   // Заполнение начальными условиями
     //K.print_cell();
 
