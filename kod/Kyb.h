@@ -69,6 +69,8 @@ public:
 	void Setup_boandary(const double& DX, const double& DY);
 	// Расфвсовать соседей по границам - с какой они стараны
 
+	void Calculation_Sourse(void);
+
 private:
 	void initialization(double, double, int);
 };

@@ -53,19 +53,21 @@ int main()
     
     //K.print_konectiviti_short();
     K.Download_setka_multifluid("all_save_14_multifluid.txt");
+    //K.Download_setka_MK("MK_all_save_15.txt");
 
-    /*for (auto& i : K.all_Kyb)
-    {
-        i->I_u = i->I_u * i->ro;
-        i->I_v = i->I_v * i->ro;
-        i->I_T = i->I_T * i->ro;
-    }*/
+    //for (auto& i : K.all_Kyb)
+    //{
+    //    //i->Calculation_Sourse();
+    //    i->I_u = i->I_u * i->ro * (n_p_LISM_ / Kn_);
+    //    i->I_v = i->I_v * i->ro * (n_p_LISM_ / Kn_);
+    //    i->I_T = i->I_T * i->ro * (n_p_LISM_ / Kn_);
+    //}
     K.M_K_training();
 
     K.M_K();
     K.print_Tecplot();
 
-    K.Save_setka_MK("all_save_15.txt");
+    K.Save_setka_MK("all_save_16.txt");
     //K.initial_condition();   // Заполнение начальными условиями
     //K.print_cell();
 

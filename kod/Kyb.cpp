@@ -151,3 +151,52 @@ void Kyb::Setup_boandary(const double& DX, const double& DY)
 	}
 }
 
+void Kyb::Calculation_Sourse(void)
+{
+	double U_M_H1, U_M_H2, U_M_H3, U_M_H4;
+	double U_H1, U_H2, U_H3, U_H4;
+	double sigma_H1, sigma_H2, sigma_H3, sigma_H4;
+	double nu_H1, nu_H2, nu_H3, nu_H4;
+	double q2_1, q2_2, q3;
+
+	U_M_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (64.0 / (9.0 * pi)) //
+		* (p / ro + 2.0 * p_H1 / ro_H1));
+	U_M_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (64.0 / (9.0 * pi)) //
+		* (p / ro + 2.0 * p_H2 / ro_H2));
+	U_M_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (64.0 / (9.0 * pi)) //
+		* (p / ro + 2.0 * p_H3 / ro_H3));
+	U_M_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (64.0 / (9.0 * pi)) //
+		* (p / ro + 2.0 * p_H4 / ro_H4));
+
+	U_H1 = sqrt(kv(u - u_H1) + kv(v - v_H1) + (4.0 / pi) //
+		* (p / ro + 2.0 * p_H1 / ro_H1));
+	U_H2 = sqrt(kv(u - u_H2) + kv(v - v_H2) + (4.0 / pi) //
+		* (p / ro + 2.0 * p_H2 / ro_H2));
+	U_H3 = sqrt(kv(u - u_H3) + kv(v - v_H3) + (4.0 / pi) //
+		* (p / ro + 2.0 * p_H3 / ro_H3));
+	U_H4 = sqrt(kv(u - u_H4) + kv(v - v_H4) + (4.0 / pi) //
+		* (p / ro + 2.0 * p_H4 / ro_H4));
+
+	sigma_H1 = kv(1.0 - a_2 * log(U_M_H1)); // 0.1243
+	sigma_H2 = kv(1.0 - a_2 * log(U_M_H2));
+	sigma_H3 = kv(1.0 - a_2 * log(U_M_H3)); // 0.1121     a_2
+	sigma_H4 = kv(1.0 - a_2 * log(U_M_H4));
+
+	nu_H1 = ro * ro_H1 * U_M_H1 * sigma_H1;
+	nu_H2 = ro * ro_H2 * U_M_H2 * sigma_H2;
+	nu_H3 = ro * ro_H3 * U_M_H3 * sigma_H3;
+	nu_H4 = ro * ro_H4 * U_M_H4 * sigma_H4;
+
+	this->I_u = (n_p_LISM_ / Kn_) * (nu_H1 * (u_H1 - u) + nu_H2 * (u_H2 - u) //
+		+ nu_H3 * (u_H3 - u) + nu_H4 * (u_H4 - u));
+	this->I_v = (n_p_LISM_ / Kn_) * (nu_H1 * (v_H1 - v) + nu_H2 * (v_H2 - v) //
+		+ nu_H3 * (v_H3 - v) + nu_H4 * (v_H4 - v));
+	this->I_T = (n_p_LISM_ / Kn_) * (nu_H1 * ((kv(u_H1) + kv(v_H1) - kv(u) - kv(v)) / 2.0 + //
+		(U_H1 / U_M_H1) * (2.0 * p_H1 / ro_H1 - p / ro)) + //
+		nu_H2 * ((kv(u_H2) + kv(v_H2) - kv(u) - kv(v)) / 2.0 + //
+			(U_H2 / U_M_H2) * (2.0 * p_H2 / ro_H2 - p / ro)) + //
+		nu_H3 * ((kv(u_H3) + kv(v_H3) - kv(u) - kv(v)) / 2.0 + //
+			(U_H3 / U_M_H3) * (2.0 * p_H3 / ro_H3 - p / ro)) + //
+		nu_H4 * ((kv(u_H4) + kv(v_H4) - kv(u) - kv(v)) / 2.0 + //
+			(U_H4 / U_M_H4) * (2.0 * p_H4 / ro_H4 - p / ro)));
+}

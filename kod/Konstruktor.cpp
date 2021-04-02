@@ -254,7 +254,7 @@ void Konstruktor::print_Tecplot(void)
 	}
 	fout.close();
 
-	name_f = "1D_tecplot_multifluid.txt";
+	name_f = "1D_tecplot.txt";
 	fout.open(name_f);
 	fout << "TITLE = \"HP\"  VARIABLES = \"X\", \"Ro\", \"P\", \"Vx\", \"Vy\", \"Max\",\"Q\",\"F_n\",\"F_u\",\"F_v\",\"F_T\", \"I_u\",\"I_v\",\"I_T\", ZONE T = \"HP\"" << endl;
 
@@ -1258,10 +1258,10 @@ void Konstruktor::M_K_training(void)
 	this->sqv_3 = (0.0000282543 * pi * kv(this->y_max));
 	this->sqv_4 = (2.54189 * pi * kv(350.0));
 	this->sum_s = this->sqv_1 + this->sqv_2 + this->sqv_3 + this->sqv_4;
-	this->Number1 = 2025000 * 5;
+	this->Number1 = 2025000 * 20;
 	this->Number2 = (647838 * 3);
 	this->Number3 = (16200 * 3);
-	this->Number4 = (2025000 * 45);
+	this->Number4 = (2025000 * 400);
 	this->AllNumber = ((this->Number1) + (this->Number2) + (this->Number3) + (this->Number4));
 
 	cout << "ALL NUMBER = " << this->AllNumber << endl;
@@ -1598,7 +1598,7 @@ bool Konstruktor::Flying_exchange(double& KSI, double& Vx, double& Vy, double& V
 
 
 	double dalpha = fabs(polar_angle(Y + time * Vy, Z + time * Vz) - polar_angle(Y, Z));
-	if (vy > 0.01 * sqrt(kv(vx) + kv(vy)) && dalpha > pi / 90.0)
+	if (fabs(vy) > 0.01 * sqrt(kv(vx) + kv(vy)) && dalpha > pi / 90.0)
 	{
 		double tt;
 		int n = ((int)(dalpha / (pi / 90.0)) + 1);
